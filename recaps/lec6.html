@@ -1,0 +1,154 @@
+---
+layout: page
+title: Lecture 6 Recap - Model Selection (Frequentist)
+mathjax: true
+weight: 0
+---
+
+<section class="main-container text">
+    <div class="main">
+      <h4>Date: February 10, 2022</h4>
+      <h4>Relevant Textbook Sections: 2.7, 2.8</h4>
+
+      <br>
+
+      <h4><a href="https://canvas.harvard.edu/courses/100256/external_tools/38806">Lecture Video</a></h4>
+
+      <h2>Lecture 6 Summary</h2>
+
+      <ul>
+        <li><a href="#recap6_1">Introduction into Model Selection</a></li>
+        <li><a href="#recap6_2">Examples of Challenges in Model Selection</a></li>
+        <li><a href="#recap6_3">Ways of Checking for Model's Ability to Generalize</a></li>
+        <li><a href="#recap6_4">A Breakdown of Generalization Error: Bias-Variance Tradeoff</a></li>
+        <li><a href="#recap6_5">Ways to Manage the Bias-Variance Tradeoff</a></li>
+      </ul>
+
+      <h2 id="recap2_1">Relevant Videos</h2>
+      <ul>
+        <li><a href="https://www.youtube.com/watch?v=Y6DA7XFh_io&list=PLrH1CxyJ7Vqb-pHzfUClJNXBDAKajHE74&index=5&t=0s">Gradient descent</a></li>
+        <li><a href="https://www.youtube.com/watch?v=X-Zdt9RqOhs&list=PLrH1CxyJ7Vqb-pHzfUClJNXBDAKajHE74&index=9&t=0s">Bias Variance Tradeoff</a></li>
+      </ul>
+
+      <h2 id="recap6_1">Introduction into Model Selection</h2>
+
+      Today is perhaps the most important lecture in terms of application of our knowledge into the real world. Specifically, today's topic is the frequentist view of model selection (the next lecture is the Bayesian view of model selection). While the Bayesian view is very elegant, the frequentist view is much more practical. <br><br>
+
+      The goal of today is essentially to figure out a why to find models that perform well on new data. If we wanted to, we could always create models that fit to the training data perfectly, but for models to have real world meaning, we want to find models that will actually generalize to new data (as in to still perform well in the presence of new data). We don't want something incredibly complicated that overfits to the patterns of the training data.
+
+      The question of how to generalize modles will be broken down into three components:
+      <ul>
+        <li><a href="#recap6_1">Basic techniques to select models that will generalize </a></li>
+        <li><a href="#recap6_2">Why models fail to generalize? </a></li>
+        <li><a href="#recap6_3">Ways to get around bias-variance tradeoffs</a></li>
+      </ul>
+
+      <h2 id="recap6_2">Examples of Challenges in Model Selection</h2>
+
+      <h4>Sunspots vs Republicans</h4>
+
+      In our homework, we used increasingly complex bases to fit to the data, and the results of our model seemed very promising when plotted on the given data. But would this trend truly extend in the future, as more data on sunspots and Republicans come in. More realistically, by making the bases too complex, we've overfit to the training data, and the models that did well on the training data would likely not extend well to future data. In addition, our simplest models (the linear regression with the simplest bases) didn't perform that well in the first place, likely underfitting to the data. So most likely, there is no relationship between sunspots and Republicans, the relationship is completely nonexistant (and logically, when we take a tsep back into the big picture, of course it shouldn't matter). We need a model selection process to help us distinguish between truly good models that generalize to new data and bad models, to help us determine the difference. While sunspots vs Republicans is pretty obvious logically to make no sense, often times it's much more subtle so we do need a formal process.
+
+      <h4>Dimensions are Much Greater than Number of Data Points</h4>
+
+      Let us look at an example where the number of dimensions is much higher than the number of data points. Specifically, we have $x_{d,n}$, where d is the dimension number. In our case, let's say we have d=2000  dimensions (binary variables) and n=8 data points. Let's say we have a property of this data where, turns out, even though there are so many dimensions in the x, really, the 1st dimension in x tells us a lot about the final class label. Specifically, it's actually a perfect predictor for the y label, we have the following fact as true: $x_{1, n} = 1$, then $y_1 = 1$.<br><br>
+
+      In theory, our model should ideally be able to figure this out and recreate this rule, then if we ever get any future data, we can simply use that rule as well and get 100% accuracy on any new data as well. However, turns out, when the dimensions are much greater, we run into a situation where simply by random chance, we might have some other dimension in x that also perfectly predicts y, which then makes it impossible for the model to tell which of the dimensions is truly the one that influences the y. This is another scenario where we want to have a model selection process that helps us determine whether models will genrealize well or not.<br><br>
+
+      Let us do the math to explain the intuition above. Let's consider just the second dimension. What is the probability that $p(x_{2, n})$ always matches $y_n$ purely from chance. Seems unlikely, we have 8 data points, and so there are $2^8$ possibilities of what our 2nd dimension looks like across 8 data points. Only one of them will perfectly match the output y in all 8, so the probability is $1/(2^8)$ or 1/256. However, remember that we actually have 2000 dimensions total, so there are 1999 dimensions where we need to worry about this possibility. Even if one other dimension matches perfectly, we could run into issues with the model not knowing which dimension truly matters. What is the probability that at least one of the other dimensions matches and leads us to potentially pick out the wrong variable?<br><br>
+
+      $$P(\textrm{at least 1 }x_{d, n}\textrm{ that d} !=1\textrm{ matches }y_n)$$
+
+      We can rewrite that as 1 minus the probability that all oother dimensions don't have a perfect match. Since there are 1999 other dimensions, we raise that to the power of 1999.
+
+      $$1-(255/256)^{1999} = 0.9996$$
+
+      This is very close to one. Something statitisicians are often worried about is that when the number of dimensions is too high, there could be lots of spurious correlations that mislead models. This is another reason to motivate why we want to have a method of evaluating whether a model will generalize.
+
+      <h2 id="recap6_3">Ways of Checking for Model's Ability to Generalize</h2>
+
+      <h4>Using a Train, Validation, and Test Split</h4>
+
+      Let's say we have our full dataset. We can split it into three parts randomly. By doing random split, we are essentially assuming that the data comes from the same distribution. There are more sophisitated things you can do, for example, you can do the split temporaly, traing on past data, and validating with more present data (this is often done in medical settings), but for the purposes of this class, we will be considering random splits.<br><br>
+
+      First, we have a training split. We can train all of our model on this part. Why might you have multiple moels? Perhaps you're doing linear regression, for example, and maybe you have lots of basis functions. Or, if you have a lot of hyperparameters, and you need to tune them and try out different ones, you would also have a lot of models.<br><br>
+
+      Next, we have a validation set, where you'll evaluate each model. In this set of the data, you can choose your best performing model.<br><br>
+
+      Finally, you have a test or evaluation set, where you get the final measure of the quality of the best model you just selected. The reason why we need a test set again is beacuse in the validation set, our selected model could've just happened to get really lucky and do really well specifically on the random validation set that we selected. Remember that at the end of the day, it is a finite set of data, so it is definiltey possibly that some models happen to work better with this specific data. Because of this, we can't simply trust the accuracy score after the validation, we need to do one more final test using completley unseen data (to avoid double dipping). This is always the safest way, to have a completely untouched test set at the end to evaluate the true accuracy of your final selected model.<br><br>
+
+      What do you do when the model doesn't do well on the test? That's the hard part, yes, because eventually you run out of data. Perhaps, you can keep a couple of extra tests sets, if you have enough data to do so. If not though, you may be in a situation where you have to do cross validation, which brings us into our next topic.
+
+      <h4>Not Enough Data: Cross Validation</h4>
+
+      It turns out that in real life, you may often find yourself in scenarios where you might not have the luxury to split the data into three parts. In that case, you might find yourself hardly able to pull out a test set, let alone a validation set.<br><br>
+
+      What we can do is cross validation. What this means is we will split the data (randomly) into parts, let's say 5 for example (although there is various theory on how many parts we should split this into). Now, what we will do is train our model on all but one of the parts. For example, first we train the data on parts 2-5, then validate on part 1. Next, we train the data on parts 1, 3-5, and validate on part 2, and we continue this pattern for each of the five parts. There is definitely double dipping here, but this is a scenario we use when we don't have the luxury of massive amounts of data (which really only big companies like Google, Facebook, etc have), and this tends to work well in practice.<br><br>
+
+      <h2 id="recap6_4">Bias Variance Tradeoff</h2>
+
+      Now that we've discussed the process of how to test if models generalize to new data and how to do the same thing if we don't have enough data, we'll take a dive into the theory on how we should select a model class. Specifically, we will do this by looking at the bias variance tradeoff.<br><br>
+
+      Generally, as a model size (complexity) gets bigger, say, as you go from linear regression to a quadratic basis, to a cubic basis, the bias goes down, as we get a greater ability to fit our model onto the training data. On the other hand, the potential for a strangely specific curve to show up in a more complicated model increase. In other words, as the model size increases, the variance tends to go up.<br><br>
+
+      This results in a situation where bias goes down while model size increases, but variance goes up while model size increases, leading to a sweet spot where we will minimize the overall test error (which is made up of bias and variance). We will want a model that is there, with a minimal test error, and we'll discuss the theory a bit on why we can break the error down into bias and variance.<br><br>
+
+      Is model size the same as number of parameters? Roughly speaking yes, but parameters might not be independent of each other, so it might not necessarily be the case. But this is a reasonable proxy to consider.<br><br>
+
+      Note: a big asusmption we are making here is that optimiziation is not an issue (as in we're assuming we're doing the gradient descent well, or we have an analytic solution, etc. This doesn't mean we're assuming we have the best test accuracy, but we are indeed assming that we are optimizing models correctly).
+
+      Does the bias variance tradeoff always hold? Do we always want some balance of bias and variance? There is one "exception" to this idea. Specifically, some argue that neural networks beat this idea, and that even though the model size is insanely high, we still do well and our model is generalizable. However, tunrs out there's a specific proecdure we take in setting up neural nets that does actually keep the model size low, stay tuned to learn more in future lectures where we cover neural networks.<br><br>
+
+      Now, let us take a look at the math:<br><br>
+
+      We start with the equation for generalization error, the expected error, in least square terms, on a new, unseen sample:
+
+      $$E_{y}[(y - \hat{y})^2] = E[(y - f_{D}(x))^2]$$
+
+      In English, this basically means we are trying to minimize the expected square distance from any data point in our dataset to our model's prediction at a given $x$. In particular, note also that our term $f_{D}(x))^2$ is dependent on our dataset, $D$. In real life, y has a mean $\bar{y}$ (this is how we define $\bar{y}$). Note that the model could be different as $\bar{y}$ (since the model might not properly capture the real life pattern of y). We now do the following modification to the equation, then expand:
+
+      $$E[(y - \bar{y} + \bar{y} - f_{D}(x))^2]$$
+
+      $$E[(y - \bar{y})^2] + E[(\bar{y} - f_{D}(x))^2] + 2E[(y-\bar{y})(\bar{y}-f_D(x)]$$
+
+      Note: everything is a function of x, but omitted. As in for every x, there is a y, there is a $\bar{y}$, so techincally you could rewrite it as $y(x)$ or $\bar{y}(x)$ if you wanted to.<br><br>
+
+      In the above equation, the first term is variance of the true noise. Imagine a scenario whenever I use a sensor to capture the data, and it always has some error, there's nothing we can do about it in the modeling process to solve this.<br><br>
+
+      The second term is error due to a bad model. When it is large, our model prediction, $f_{D}(x)$, varies significantly from the "real life" dataset mean, $\bar{y}$. <br><br>
+
+      The third term ends up being 0. This is because we assume noises (as in $y - \bar{y}$) are independently chosen, at run time, and so hence we can say the first term (of the third term) is independent of second term. More importantly, the second term (of the third term) is a constant value: it is just our prediction value subtracting the true value at a given $x$. By expectation rules, we pull the second term out of the expectation. Then, multiply the two to find that the whole thing goes to zero because the remaining expected value of the first term goes to zero.<br><br>
+
+      Next, we break up the second term above.<br><br>
+
+      $$E[(\bar{y} - f_{D}(x))^2] = E[(\bar{y} - \bar{f}(x))^2] + E[(\bar{f}(x) - f_D(x))^2] + 2E[(\bar{y} - \bar{f}(x))(\bar{f}(x) - f_D(x))]$$
+
+      We've introduced a new variable $\bar{f}(x) = E_D[f_D(x)]$. To describe this, imagine if you took a bunch of datasets, and did this whole experiment a million times. Concretely, imagine you took 100 data points, fit it, took 100 more data points, fit it again, and then averaged all the models. That's what $\bar{f}$ represents.<br><br>
+
+      Is $\bar{f}$ the same as $\bar{y}$? No, as a quick example, if you had a linear model, and you fit it many times, the average model would still be a line, but if we had our true y as a parabola, then it would still be a parabola and $\bar{f}$ would be different from $\bar{y}$.<br><br>
+
+      Now, we can break down the above expression.<br><br>
+
+      For the first term, we can rewrite this as: $(\bar{y}-\bar{f}(x))^2$, as these are constants that won't change after we take the expectation. The first term represents the bias squared. It shows that if you have the wrong model class, you you will suffer an error here no matter how good everything else is.<br><br>
+
+      The second term is the variance of model fit. If all the models are very far from the mean, that will contribute to the error term here.<br><br>
+
+      The third term evaluates to zero. This is because we can do the following:
+
+      $$2(\bar{y}-\bar{f}(x))E[\bar{f}(x)-\hat{y}(x)] = 2(\bar{y}-\bar{f}(x))(0) = 0$$
+
+      So overall, we have:
+      $$E[(\bar{y}-\hat{y})^2] = \textrm{noise} + \textrm{bias}^2 + \textrm{variance}$$
+
+      Only the bias and the variance are controllable through your model. Note that we went through two rounds of calculating the expectation: one expectation of $y|x$ and one term over the possible of choices of datasets. 
+
+      <h2 id="recap6_5">Ways to Manage the Bias-Variance Tradeoff</h2>
+
+      <ol>
+        <li>Using Regularization: ridge regression ($w^2$), lasso regression ($|w|$). This makes the model class smaller, as in by doing regularization, we are basically saying we only think a few dimensions matter, and ask our model to only pick out one or two important covariates, which reduces the variance. </li>
+        <li>Using Ensemble: classification by committee, adaboost, random forest, bagging, extra random forest, graident boost, bootstrapping. As an example, instead of fitting one linear regression, we fit a boatload, then take the average of predictors. This is good because we're effectively reducing the variance, as we're already taking an average when we create the model.</li>
+      </ol>
+
+      We ultimately want to make sure that we're both not underfitting, nor overfitting. Underfitting means that the model we've selected is not expressive enough and doesn't capture the trend in the data, and the that our issue is that the bias is too high. Overfitting means that our model is suffering from the issue of too much variance.
+    </div>
+</section>

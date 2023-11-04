@@ -1,0 +1,124 @@
+---
+layout: page
+title: Lecture 8 Recap - Neural Networks 1
+mathjax: true
+weight: 0
+---
+
+<section class="main-container text">
+    <div class="main">
+      <h4>Date: February 17, 2022</h4>
+      <h4>Relevant Textbook Sections: 4.4, 4.5, 4.6</h4>
+      <h4>Cube: Supervised, Discrete or Continuous, Nonprobabilistic</h4>
+
+      <br>
+
+      <h4><a href="https://canvas.harvard.edu/courses/100256/external_tools/38806">Lecture Video</a></h4>
+
+      <h2>Announcements</h2>
+      <ol>
+        <li>Homework deadlines have been moved from 8:00pm to 11:59pm. This means HW2 is due 11:59pm.</li>
+        <li>The midterm is in less than two weeks. Next Tuesday's class will be the final set of material for the midterm.</li>
+      </ol>
+
+
+      <h2>Lecture 8 Summary</h2>
+
+      <ul>
+        <li><a href="#1">Deep Learning Today</a></li>
+        <li><a href="#2">Deep Learning Models</a></li>
+        <li><a href="#3">Why is this Reasonable?</a></li>
+        <li><a href="#4">Additional Architectures</a></li>
+      </ul>
+
+      <h2 id="1">Deep Learning Today</h2>
+
+      Deep learning has been increasingly commonplace of our lifes: auto-completing words on your phone, using swipe-type, cameras automatically focussing on faces, Google translate. These tools have been only now becoming more inclusive, where automatic face focussing would only work well on people with lighter skin.
+      <br>
+      <br>
+
+      Why has deep learning been working so well? The deep learning models are entirely enabled by the massive amount of data we have access to in the modern world.
+      <br>
+      <br>
+      
+      The importance of data for deep learning implies, unsurprisingly, that deep learning works well as an interpolator, but not an extrapolator.
+      <br>
+      <br>
+      
+      The ideas for many deep learning models have existed since the 1990s. However, it has only been able to take off now because of the mssive computing power brought on by GPU technologies growing so rapidly in the 2010s.
+      <br>
+      <br>
+      
+      Without data and without computing power, deep learning would simply not be as ubiquitous as it is today.
+
+      <h2 id="2">Deep Learning Models</h2>
+
+      Let's consider logistic regression. Recall in probabalistic classification which looked like the following $$p(y | x) = \sigma(-(w^\top x + b)) = \frac{1}{1 + \exp(-(w^\top x + b))}.$$
+      <br>
+      <br>
+
+      Given a particular slope and offset $w, b$, then the $w^\top x + b = 0$ marks the line where $p(y = 1 | x) = 0.5$. That means the boundary in logistic regression is always linear. We need a more "expressive" model class to be able to draw non-linear boundary in order to fit the structure of non-linearly seperable data.
+      <br>
+      <br>
+
+      One thing we can do is use a basis $\phi : \mathbb R^D \to \mathbb R^{D'}$ to transform the $x$. Yes, this would solve the problem by allowing us to achieve non-linear boundaries, but what if we don't know what basis $\phi$ to use? We can simply "learn" the basis. This is the fundamental idea behind deep learning. In the statistics community, deep learning is considered "adaptive basis regression".
+      <br>
+      <br>
+
+      Let $f = \mathbf w^\top \phi + \mathbf b$ and $p(y = 1| x) = \sigma(-f)$. The big question is what is the form of $\phi$? When we talk about "architecture" of a neural network, we are talking about the structure and form of $\phi$. One option is to say we have our datapoint $\mathbf x \in \mathbb R^D$ as inputs. We can then define $\phi = \sigma(\mathbf W^{(1)} \mathbf x + \mathbf b^{(1)})$ as our basis transformed datapoint where $\mathbf W^{(1)} \in \mathbb R^{J \times D}$ and $\mathbf b^{(1)} \in \mathbb R^J$. These "parameters" $\mathbf W^{(1)}$ and $\mathbf b^{(1)}$ maps $\mathbf x$ from a $D$-dimensional vector to a $J$-dimensional vector $\phi$. The superscripts indicate that these weights are done in the first step (or layer).
+      <br>
+
+      <h2 id="3">Why is this Reasonable?</h2>
+
+      <h3>Expressiveness</h3>
+
+      This is an expressive model class. As $J \to \infty$ gets big, this becomes a universal funciton approximator. This means we can express any function $f$. To get some intuition behind this, imagine first the J=2 scenario picking sigmoid as our activation function. Essentially, what we can do is build up a little staircase like figure below, with the sigmoid functions together.
+
+      <div class="text-center">
+        <img src="{{ site.baseurl }}/images/recap8_2.png" style="width:40%"  alt="Neural Net Diagram 1"></img>
+      </div>
+      
+      As we have more and more sigmoid functions (which we get when we add more nodes to the hidden layer), we can represent increasingly complicated functions, as if we have a really fine staircase.
+      
+      <div class="text-center">
+        <img src="{{ site.baseurl }}/images/recap8_3.png" style="width:40%"  alt="Neural Net Diagram 1"></img>
+      </div>
+      
+      Notice that according to this, polynomaisl might be hard to fit with this. This relates back to inductive bias of the architecture.
+      
+      <h3>Ease of Computation</h3>
+      The other reason why we might choose this architecture is because it is computationally easy. Computing $phi$ requires matrix multiplication and addition. It turns out that computers are great at this. This ease fascilitates both prediction and optimization. 
+      <br>
+      <br>
+      
+      You probably noticed that we could have changed the non-linear function we use. We call these "funcitons activation functions". Instead of using the sigmoid function $\sigma$, we could use $\tanh$ or the rectified linear unit (ReLU): $$\operatorname{RELU}(x) = \max(0, x).$$
+      <br>
+      <br>
+      
+      The sigmoid activation might have an easy time representing something that looks like a set of stairs. The radial basis activation might have a easy time representing wavey functions. The ReLU activation might allow you to make jagged functions. The inductive bias is our choice of activation function and how that impacts what types of functions we can model.
+      <br>
+      <br>
+      
+      Note that in classification, we will always need softmax at the end to ensure a proper probablity distribution. These function approximators can absolutely be used for regression, though!
+      <br>
+      
+
+      <h2 id="4">Additional Architectures</h2>
+      One obvious thing we can do is add more layers. Imagine we have $L$ "hidden layers" (above, we had just one layer). Then we can say $$\Phi^{(1)} = \operatorname{a}(\mathbf W^{(0)} \mathbf X + \mathbf b^{(0)})$$ and $$\Phi^{(\ell)} = \operatorname{a}(\mathbf W^{(\ell-1)} \mathbf \Phi^{(\ell-1)} + \mathbf b^{(\ell-1)})$$ for all $1 < \ell \leq L$. Then our output would be in terms of the last hidden layer $\Phi^{(L)}$. In classification, this would look like $$\mathbf O = \operatorname{softmax}(\mathbf W^{(L)} \mathbf \Phi^{(L)} + \mathbf b^{(L)}).$$
+      <br>
+      <br>
+
+      Multiple layers allows for feature reuse which allows us to model more easily.
+      <br>
+      <br>
+
+      For state of the art architectures, we highly recommend working through the <a href="https://d2l.ai/">D2L.ai course</a>.
+
+      <!-- See Beyond 181 lectures to learn more about
+      <ol>
+        <li>Convolutional neural networks (CNNs): neural networks which take into account the spatial relationships between input values</li> 
+        <li>Recurrent neural networks (RNNs): neural networks designed to better handle sequential information</li>
+        <li></li>
+      </ol>
+    </div> -->
+</section>

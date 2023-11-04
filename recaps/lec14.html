@@ -1,0 +1,178 @@
+---
+layout: page
+title: Lecture 14 Recap - Mixture Models
+mathjax: true
+weight: 0
+---
+
+<section class="main-container text">
+    <div class="main">
+
+
+      <h4>Date: March 22, 2022</h4>
+      <h4>Relevant Textbook Sections: 9.1-9.5</h4>
+      <h4>Cube: Unsupervised, Discrete, Probabilistic</h4>
+
+      <br>
+        
+      <h4><a href="https://canvas.harvard.edu/courses/100256/external_tools/38806">Lecture Video</a></h4>
+
+      <h2>Summary</h2>
+
+      <ul>
+        <li><a href="#recap14_1">Mixture Models</a></li>
+        <li><a href="#recap14_2">The Set Up and the Connection to Generative Classification</a></li>
+        <li><a href="#recap14_3">Specific Example: Gaussian Mixture Model</a></li>
+        <li><a href="#recap14_4">General Properties of Expectation Maximization</a></li>
+      </ul>
+
+      <h2 id="recap14_1">Mixture Models</h2>
+
+      A mixture model is unsupervised, discrete, and probabilistic model. It is in the same categories as clustering except for the fact that it is probabilistic. For the intuition on this, basically as opposed to simply clustering a given x into a final cluster z, we want to instead capture the fact that the datapoint x might have a breakdown of probabilities of which z it is part of. To take a quick example, imagine we are looking at heights in a human population. It turns out that the height of men and women are both are approximately Gaussian, with different means and variances. In an unsupervised setting, imagine getting all the combined height data but with no labels, so all we have is heights. We happen to know that truly underlying is a discrete variable, their sex, that leads to two separate Gaussians, but when you put them together it leads to a funky looking distribution. To deal with this, we can use a mixture model, which won't say outright which cluster a given height is in, but instead will give us probabilities of being in different cluster (the different sexes here).<br><br>
+
+      <h2 id="recap14_2">The Set Up and the Connection to Generative Classification</h2>
+
+      Before we move on, let's think back to generative classification (<a href="{{ site.baseurl }}/recaps/lec5" target="_blank">click here for that lecture recap</a>). Generative classification is the same as mixture models in the sense that it's discrete and probabilistic, but generative classification is supervised whereas mixture models are unsupervised. Drawing this tie will be pretty useful for the purposes of the intuition and math ahead.<br><br>
+
+      So let's now look at mixture models with relation to generative classification. In generative classification,  we told a generative story: specifically that y generates x. In the same way, in mixture models, we have a z (a hidden variable since we have no y's) that is going to produce our x's. In addition in mixture models, we have our parameters w (we use w to generally denote all the parameters, even if they might be $\mu$ or $\Sigma$ or other letters in specific scenarios) that will affect our x's as well.<br><br>
+
+      To summarize briefly, in our mixture model we have:<br><br>
+
+      $z_n$ ~ $\pi$ (probability of being in a cluster k; for example the sexes in the height example)<br>
+
+      $x_n$ ~ $p(x_n | z_n; w)$ (probability of height being this value given the sex and the parameters, which are the means and variances of the Gaussians of the different sexes)<br><br>
+
+      In the past, in generative classification, we were able to solve the following:
+      <ol>
+        <li>We solved for w given the data ({x, y}) using maximum likelihood</li>
+        <li>We solved for y given w and a specific x</li>
+      </ol>
+
+      This shows us that with 2 of 3 pieces of information, we were able to solve. Now, in mixture models, we only have x, so the challenge is to figure out a way to solve despite only having x.
+
+      <h2 id="recap14_3">Specific Example: Gaussian Mixture Model</h2>
+
+      Let us now dive into a specific example, looking at a Gaussian Mixture Model. This will help us see general properties of mixture models as well. If it also helps, this is parallel to what we did in Problem Set 2, problem 2 and 3, where one of our ways of modeling the stars was a generative classification model (we did one model with shared and one model with different covariances). We first set it up below: <br><br>
+
+      $p(z_n = k) = \pi_k$ (this is categorical, analogous to representing the three stars)<br>
+      $p(x | z=k) = N(\mu_k, \Sigma_k)$ (Gaussian with $\mu_k$ and $\Sigma_k$, analogous to representing each stars mean and variance)
+
+      Now with the set up, we can start trying to calculating our log-likelihoods as we usually do.<br><br>
+
+      <h4>Let's try "Complete" Data Log-Likelihood (doesn't work unless given $z_{nk}$)</h4>
+
+      First, we look at the $\log p(x, z | w)$, also known as the "Complete" Data Log-Likelihood because it assumes that we have both our observation x and the class z that x came from:
+
+      $$\log p(x, z ; w) = \sum_n \log p(x_n, z_n ; w)$$
+
+      $$\log p(x, z ; w) = \sum_n \log p(x_n|z_n; w) + \log p(z_n ; w)$$
+
+      $$\log p(x, z ; w) = \sum_n \log N(x_n ; \mu_{z_n}, \Sigma_{z_n}) + \log \pi_{z_n}$$
+
+      $$\log p(x, z ; w) = \sum_n \sum_k z_{nk} \log N(x_n; \mu_k, \Sigma_k) + z_{nk} \log \pi_k$$
+
+      We notice that, if we are given $z_{nk}$, then solving for the maximum likelihood of $\pi$, $\mu$, and $\Sigma$, is actually pretty easy, which would correspond to what we did before in generative classification. But without $z_{nk}$, this is hard, and non convex. We won't be able to solve for the maximmum likelihood of $\pi$, $\mu$, and $\Sigma$.
+
+      Note also that, this equation above looks like the K-Means objective. If the $\pi_k$ were uninformative, and did not really prefer a particular cluster, then the $ z_{nk} \log(\pi_k)$ wouldn't really matter. The other term, $z_{nk} \log N(x_n; \mu_k, \Sigma_k)$, is taking the log of the Gaussian, and since the PDF of a normal is exponential, after taking the log of it we just end up with the squared term (that was inside the exponential). This is exactly like the K-Means objective we had from before. This helps us confirm and note the similarities between clustering and mixture models.
+
+      <h4>Let's Try Log-Likelihood (doesn't work as is)</h4>
+
+      We should also consider the normal log-likelihood (not the "complete") that we usually do. What if we integrate out the z? Technically, we don't care about z itself, we are just trying to explain the dataset of x's we're seeing. We could argue that we just need: $\sum_n \log p(x_n;w)$. The z's were just a way for us to provide summarization, but it's okay for us to integrate it out, one could argue.
+
+      How does this relate to the previous situation? Before, we had $p(x_n, z_n ; w)$, so to get $p(x_n|w)$ we would just need to sum out the z's. We would end up with:
+
+      $$p(x_n|w) = \sum_k p(x_n, z_n ; w)$$
+      $$p(x_n|w) = \sum_k \pi_k p(x_n | z_n; w)$$
+      $$p(x_n|w) = \sum_k \pi_k N(x_n; \mu_k, \Sigma_k)$$
+
+      To explain the intuition on this, we're essentially summing across all clusters, and for each cluster, we're incorporating the $\pi_k$, the probability of that cluster, by multiplying it with the $p(x_n, z_n ; w)$ term. Then we can sub it into the full term we were looking for:
+
+      $$\sum_n \log p(x_n;w) = \sum_n \log(\sum_k \pi_k N(x_n; \mu_k, \Sigma_k))$$
+
+      Turns out, there are no analytic solutions here and the gradients are messy, so we must try something else, using our block coodrinate ascent approach (aka alternating optimization).
+
+      <h4>How to Solve: Max Max (Method 1)</h4>
+
+      First method specifically is called max max, which is going to look very much like Lloyd's algorithm. This method optimizes the complete data log likelihood.
+
+      <ol>
+        <li>Start with z's randomly intialized</li>
+        <li>Find maximum likelihood of $\pi$, the collection of $\mu$'s, and the collection of $\Sigma$'s given z (we discussed that this is possible above in the "Complete" data log likelihood section)</li>
+        <li>Find best z given the $\pi$, $\mu$, and $\Sigma$'s (essentially update z that minimizes the loss)</li>
+      </ol>
+
+      <h4>How to Solve: Expectation Maximization which will approximate $\sum_n \log p(x_n;w)$ (Method 2)</h4>
+
+      This second method tackles the log likelihood and tries to approximate it since as we saw above, there is no way to solve the log likelihood.
+
+      <h5>Set Things Up using Expectations</h5>
+
+      First, let's set up the problem in the right way. As mentioned in the this subtopic heading, this method is a bit different than the first method as it attempts to approximate the log likelihood, $\sum_n \log p(x_n;w)$ (not the complete data log likelihood). But in order to do this, we start with the fact that a lower bound on $\sum_n \log p(x_n;w)$ is given by the following (no need to know the proof for the class, <a href="images/recap14_1.png" target="_blank">but click here if interested</a>):
+
+      $$\sum_n E_z[\log p(x_n, z_n ; w)]$$
+
+      In words, we can describe the above equation in the following way: the expected complete data log likelihood is the lower bound for p(x|w), so optimizing this means optimizing for the worst p(x|w) can be.
+
+      Let's expand the inside of the expectation in the same way we did previously:
+
+      $$\sum_n E_z[\log p(x_n|z_n; w) + \log p(z_n ; w)]$$
+
+      Then, we can expand out the expectation:
+
+      $$\sum_n \sum_k [p(z_n = k | x_n; \pi, \mu, \Sigma) \log N(x_n; \mu_k, \Sigma_k) + p(z_n = k | x_n; \pi, \mu, \Sigma) \log \pi_k]$$
+
+      To keep things visually cleaner, we'll define $q_{nk} = p(z_n = k | x_n; \pi, \mu, \Sigma)$ so we can write it as:
+
+      $$\sum_n \sum_k [q_{nk} \log N(x_n; \mu_k, \Sigma_k) + q_{nk} \log \pi_k]$$
+
+      We notice here that given $q_{nk}$, we will be able to find our parameters.
+
+      <h5>Actually Optimizing It: The EM Algorithm</h5>
+
+      Now that we're done setting up, we describe the expectation maximization algorithm. At a high level, we are first going to randomly initialize our parameters, and use those to calculate $q_{nk}=p(z|x; w)$ by considering expectations across all {z} (the expectation step). Then, with $q_{nk}$ in hand, we can find the maximum likelihood of all the parameters ($\mu_k$, $\Sigma_k$) using the equation we set up above (maximization step). Then, with those parameters, we will repeat the expectation step, then the maximizations step, etc.
+
+      <u>1st step: Expectation Step</u><br><br>
+
+      We want to find $p(z|x; w)$ (where w represents all the parameters) and it turns out that:
+
+      $$p(z|x; w) \propto p(z;w) p(x|z;w)$$
+
+      $$p(z = k|x; w) \propto \pi_k p(x; w_k)$$
+
+      This is easy because we know this by definition. In this example we know $p(x; w_k)$ is Gaussian and we have the parameters (randomly intialized the first time through, but afterwards we have it from the maximization step), and we also have the x's. But it's not only Guassians that are easy, literally any fuction works because we have all the values we need to plug in!<br><br>
+
+      <u>2nd step: Maximization Step</u><br><br>
+
+      Next, we maximize $\sum_n E_z[\log p(x_n, z_n; w)]$ which we broke down to the form of $\sum_n \sum_k [q_{nk} \log N(x_n; \mu_k, \Sigma_k) + q_{nk} \log \pi_k]$ and determined that we will be able to solve for our parameters given $q_{nk}$ (see section above). Specifically, we maximize this with respect to $\pi$, $\mu$, and $\Sigma$ to find exactly those parameters. We omit the math on how exactly to solve them, but we give the solutions below so we can discuss the intuition:
+
+      $$\pi_k = \frac{\sum_n q_{nk}}{N}$$
+
+      Where $q_{nk}$'s are indicating how likely you are to belong to a particular cluster, and where N is the total number of points in a dataset. This basically tells you what every single data point believes about the likeliness of a given cluster k, which intuitively seems correct.
+
+      $$\mu_k = \frac{\sum_n q_{nk} x_n}{\sum_n q_{nk}}$$
+
+      Intuitively, we can think of this as a weighted average of the x's that belong in cluster k (weighted by how probable a given x belongs to a cluster). This is divided by the expected cluster size to normalize.
+
+      $$\Sigma_k = \frac{1}{\sum q_{nk}} \sum_n q_{nk} (x_n - \mu_k)(x_n - \mu_k)^T$$
+
+      This is like how we normally calculate our variances, except we are weighting in the probabilty of given clusters and dividing by the expected cluster size to normalize.<br><br>
+
+      Overall, we see that this is now easy! We have analytic updates for the M step and the E step, so we call this the EM algorithm.
+
+      <h2 id="recap14_4">General Properties of EM</h2>
+
+      Remember that in the above example, we did some very specific expressions in our Gaussian mixture model. Taking a step back and looking at the bigger picture, is this still generalizable? Indeed it is, and here we take note some overall things about the EM algorithm.<br><br>
+
+      E step: posterior over local hiddens (referring the z variables, which is local because each datapoint has an unknown)<br>
+      M step: maximize over global parameters (refers to global because the parameters are global)<br><br>
+
+      Properties:
+      <ol>
+        <li>Monotonically improve the expected complete data liklelihood (just like in Lloyd's algorithm)</li>
+        <li>When we have exponential family distributions, usually the updates are analytic</li>
+        <li>We will be finding a local optima, not a maximum optiam</li>
+      </ol>
+
+      Final Note: if we have a mixture of Gaussians, and imagine we also have a very small covariance (and different means for the distributions), then we essentially have K-Means. This is because the q's will basically become z's (in the sense of becoming one hot encodings); when we're given an x, we will snap that x to the closest distribution with almost 100 percent certainty since the covariances are all very small. This gives our final result of a bunch of x's each with almost near certainty of which cluster it's in, which, if we just took those as completely certain, then we have exactly K-Means.
+    </div>
+</section>

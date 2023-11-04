@@ -1,0 +1,34 @@
+---
+layout: page
+title: Schedule
+weight: 0
+---
+
+<section class="main-container text">
+    <div class="main">
+        <table class="table">
+            <tr>
+                <th>Date</th>
+                <th>Topic</th>
+                <th>Subtopic</th>
+                <th>Section</th>
+                <th>Readings</th>
+                <th>HW Release</th>
+                <th>HW Deadline</th>
+            </tr>
+            {% for lecture in site.data.all.lectures %}
+            <tr class='{{lecture.type|default: ""}}'>
+                <td> {{site.data.all.dates[forloop.index]}} </td>
+                <td> {{lecture.topic | default: ""}} </td>
+                <td> {{lecture.subtopic | default: ""}}</td>
+                <td> {{lecture.section | default: ""}}</td>
+                <td> {{lecture.readings | default: ""}}</td>
+                <td> {{lecture.release | default: ""}}</td>
+                <td> {{lecture.dl | default: ""}}</td>
+            </tr>
+            {% endfor %}
+        </table>
+
+        *SB refers to <a href="{{ site.baseurl }}/resources#sb">Sutton and Barto 2018, Reinforcement Learning: An Introduction</a>.
+    </div>
+</section>

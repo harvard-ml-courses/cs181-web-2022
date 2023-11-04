@@ -1,0 +1,238 @@
+---
+layout: page
+title: Lecture 21 Recap - Reinforcement Learning 1
+mathjax: true
+weight: 0
+---
+
+<section class="main-container text">
+    <div class="main">
+
+      <h4>Date: April 14, 2022</h4>
+      <h4>Relevant Textbook Sections: <a href="http://incompleteideas.net/book/the-book.html">Sutton & Barto</a> 4, 6.4, 6.5</h4>
+      <br>
+
+      <h4><a href="https://canvas.harvard.edu/courses/100256/external_tools/53531">Lecture Video (in "Cloud Recording")</a></h4>
+
+      <h2>Summary</h2>
+
+      <ul>
+        <li><a href="#recap21_1">Intro: Real World Thinking on Designing the Reward Function</a></li>
+        <li><a href="#recap21_2">Jumping Back into MDPs</a></li>
+        <li><a href="#recap21_3">Infinite Horizon Planning</a></li>
+        <li><a href="#recap21_4">Value Iteration</a></li>
+        <li><a href="#recap21_5">Policy Iteration</a></li>
+        <li><a href="#recap21_6">Reinforcement Learning</a></li>
+
+      </ul>
+
+      <h2 id="recap21_1">Intro: Real World Thinking on Designing the Reward Function</h2>
+
+      Imagine that you have an RL-based robot that cleans your room, and it receives a reward when it picks up a piece of trash. What could go wrong? 
+
+      Well, the robot might eventually learn to repeatedly knock over the trash can so there’s more trash on the floor. Then it can achieve a greater reward by continually picking the trash back up. We have to be very careful when engineering reward functions to avoid unintended effects like this one.
+
+      <h2 id="recap21_2">Quick Recap of MDPs from Last Time</h2>
+
+      As a refresher from last time, our MDPs are defined by:
+
+      $$\{S, A, r, p\}$$
+      
+      Where $S$ is a set of possible states, $A$ is a set of possible actions, $r(s,a)$ is the reward function (tells us the reward received for doing action $a$ at state $s$), and $p(s' | s,a)$ is the transition function (tells us the probability of the next state being $s'$ if the current state is $s$ and we do action $a$). Our goal is to find the policy $\pi(s)$ that maximizes $E\left [\sum_{t=0} \gamma^t r_t\right ]$, the expected sum of discounted rewards.<br><br>
+      
+      Today, we will continue our discussion on planning and introduce reinforcement learning. These are both MDP problems, but they are not the same problem. In planning, we are given a model of the environment (the full MDP, including the reward and transition functions) and seek to output a policy. In reinforcement learning, an agent does not have a model of the environment and has to interact with the environment to learn about what its policy should be.<br><br>
+      
+      <h2 id="recap21_3">Infinite Horizon Planning</h2>
+
+      We have an MDP value function
+
+      $$ V^{\pi}(s) = \mathbb{E}_{s \sim p} \left [\sum^{\infty}_{t=0}\gamma^t r(s_t, \pi(s_t)) | s_0 = s \right ]$$
+
+      Where $\gamma$ is a discount factor describing how we discount rewards going into the future.<br><br>
+
+      Policy $\pi$ is “better than or equal to” policy $\pi’$ if $V^{\pi}(s) \geq V^{\pi’}(s)$ for all states $s$. We say $\pi^*$ is an optimal policy if it is better or equal to all other policies $\pi$. <br><br>
+
+      From $\pi^*$, we can get the optimal value function: the value function associated with the optimal policy, defined as
+
+      $$V^*(s) = \max_{\pi} V^{\pi}(s)$$
+
+      Our goal is to find the optimal policy. To accomplish this, we will try to calculate the optimal value function. Once we know the optimal value function, we can extract the optimal policy from it by picking the best action at each state according to $V^*$. Specifically, once the optimal value function is known, we can get the optimal step at every state using:
+
+      \begin{equation} \pi^*(s) \in \arg\max_a \left [r(s,a) + \gamma\sum_{s’} p(s’ | s,a)V^*(s’)\right ] \tag{*} \end{equation}
+
+      The principle we use for this calculation is the Bellman equation, or the Principal of Optimality:
+
+      \begin{equation}
+      V^*(s) = \max_{a}[r(s,a) + \gamma \sum_{s’} p(s’ | s,a)V^*(s’)] \tag{$\square$}
+      \end{equation}
+
+      In English, this says that the value of a state $s$ equals the value of taking the best action when you are in $s$, plus the value of continuing to take the optimal actions in future steps. <br><br>
+
+      <h2 id="recap21_4">Value Iteration</h2>
+
+      <h4>The Algorithm</h4>
+
+      We can solve $(\square)$ iteratively as follows:
+      
+      <ol>
+        <li> Initialize $V(s) = 0$ for all s </li>
+        <li> Repeat the following </li>
+        <ol>
+          <li>Set $V’(s) = \max_{a}[r(s,a) + \gamma \sum_{s’} p(s’ | s,a)V(s’)]$</li>
+          <li>Replace $V(s)$ with $V’(s)$ for all $s$</li>
+        </ol>
+      </ol>
+
+      Again, once we have an approximation for $V^*$, we can extract the corresponding approximation of the optimal policy using $(*)$ from above.<br><br>
+      
+      Theorem: Using the value iteration algorithm above, $V$ will converge to the optimal value function $V^*$. 
+      
+      <h4>Why This Works</h4>
+      
+      Why does this work? We’ll give a quick sketch. Consider a function $f: \mathbb{R}^D \longrightarrow \mathbb{R}^D$ and an update step $x’ \leftarrow f(x)$. Also say $x^*$ is a fixed point iff $f(x^*) = x^*$. <br><br>
+      
+      Define the contraction property: $f$ is a contraction when for all $x \neq y$, it holds that
+      
+      $$ ||f(x) - f(y)|| < ||x - y|| $$
+      
+      <b>Theorem:</b> Given this contraction property, $f(x)$ has a unique fixed point and $x’ \leftarrow f(x)$ will converge to the fixed point. <br><br>
+      
+      <b>Example:</b>  The contraction property means that applying $f$ to both x and y can only bring them closer together. For instance, $f(x) = \frac{x}{2}$ has the contraction property. If $x = 8, y = 2$, so $||x - y|| = 6$, then $||f(x) - f(y)|| = ||4 - 1|| = 3$, which is less than $6$. We can also see that $f(x) = \frac{x}{2}$ has the fixed point $0$.  <br><br>
+      
+      <b>Proof of Theorem:</b>  First, we argue that $f$’s fixed point must be unique. If this wasn’t, then we’d have two fixed points $x^*$ and $y^*$ s.t.
+      
+      $$||f(x^*) - f(y^*)|| = ||x^* - y^*||$$
+      
+      Because by the definition of a fixed point, $f(x^*) = x^*$ and $f(y^*) = y^*$. However, this violates the contraction property, so we have a contradiction, and $f$ can’t have more than one fixed point. <br><br>
+      
+      Also, if we repeatedly set $x’ \leftarrow f(x)$, we will eventually converge to a fixed point $x^*$. This is because if $x’$ is currently not equal to $x^*$, then the distance between them is $||x’ - x^*||$. If we update both these points and then consider the distance again, it follows from the contraction property that
+      $$||x - x^*|| > ||f(x) - f(x^*)|| = ||f(x) - x^*||$$
+      
+      This tells us that as we keep updating $x’$, it must keep getting closer to the fixed point. <br><br>
+      
+      The Bellman operator B is a contraction if we use the norm $||V|| = \max_s |V(s)|$, so the value iteration function has a fixed point. <br><br>
+      
+      When we visualize value iteration on a GridWorld environment, the values “ripple out” from reward sources. This is because with further iterations, we can “see farther” from each state. After just one value iteration, we are only aware of rewards in directly neighboring states. After many iterations, there has been a chance for information about rewards to propagate to further states. <br><br>
+
+      <h4>Additional Comments</h4>
+
+      <ul>
+        <li>Value iteration converges to $V^*$ asymptotically. Even after the optimal policy stops changing, the value function values will probably continue shifting.</li>
+        <li>The optimal policy can be extracted from V in a finite number of steps.</li>
+	      <li>This method is very similar to the finite time horizon planning problem from last week. The difference is that we don’t have a set number $T$ of limited steps.</li>
+      </ul>
+     
+      <h2 id="recap21_5">Policy Iteration</h2>
+      <h4>The Algorithm</h4>
+
+      In policy iteration, we start with a policy $\pi^0$. Then, we repeatedly:
+
+      <ol>
+        <li>Determine the value function $V^{\pi}$ for the current policy</li>
+        <li>
+          Use the value function to improve the policy for all s as follows:
+          $$ \pi’(s) \leftarrow \arg\max_a r(s,a) + \gamma\sum_{s’} p(s’ | s,a)V^{\pi}(s’)$$
+        </li>
+      	<li>Update the next $\pi$ to be $\pi’$</li>
+      </ol>
+
+      Policy iteration alternates between evaluating a policy (finding the value function) and updating the policy. Remember that in value iteration, we didn’t keep track of a policy; we just extracted it from the value function at the end. <br><br>
+
+      <b>Theorem:</b> Policy iteration converges to the optimal policy in a finite number of steps and will also yield the optimal value function. (The difference: we weren’t guaranteed the optimal value function in finite steps with Value Iteration.) <br><br>
+
+      <b>Sketch:</b> If the policy is already optimal, the update step will not change it. But if it is not optimal, the update step will provide “better steps” to take. Imagine that for some state $s$, there’s an action $a’$ different from the policy’s recommended action $a = \pi(s)$ s.t.
+
+      $$r(s,a’) + \gamma\sum_{s’} p(s’ | s,a’)V^{\pi}(s’) > V^{\pi}(s)$$
+
+      This means that taking $a’$, then continuing to follow $\pi$, is better than following $\pi$ (which would recommend taking $a$ at the current step instead), so we should update $\pi$ to recommend action $a’$ at state $s$. <br><br>
+
+      It holds that each time the policy gets updated in policy iteration, $V^{k + 1} > V^k$. <br><br>
+
+      <h4>Notes</h4>
+
+      Given $\pi$, we can solve a system of equations to get $V^{\pi}$, where for each s we have an equation of the form
+
+      $$V^{\pi}(s) = r(s, \pi(s)) + \gamma\sum_{s’} p(s’ | s,\pi(s))V^{\pi}(s’)$$
+
+      Since we have $|s|$ unknowns (the value at each state) and $|s|$ equations, this system will be solvable. <br><br>
+      In matrix form (P is the transition matrix):
+      \begin{align*}
+      V^{\pi} = R^{\pi} + \gamma P^{\pi}V^{\pi}
+      \\ &\iff (I - \gamma P^{\pi})V^{\pi} = R^{\pi}
+      \\ &\iff V^{\pi} = (I - \gamma P^{\pi})^{-1}R^{\pi}
+      \end{align*}
+
+      Where $(I - \gamma P^{\pi})$ will be a matrix with full rank.
+
+      <h4>Policy vs. Value Iteration</h4>
+
+      Policy iteration uses fewer iterations than value iteration does to solve for $\pi^*$. Let L be the maximum number of reachable states. Per iteration, the work needed for value iteration is $O(|S||A|L)$, while the work for policy iteration is $O(|S||A|L + |S|^3)$ per iteration. The cubed term comes from the policy evaluation step. Policy iteration is doing much more work per iteration than value iteration does. Usually, we will prefer policy iteration.
+
+      <h2 id="recap21_6">Reinforcement Learning</h2>
+
+      In planning, we had a full model of the environment. We knew the transition matrix, the reward functions, etc.<br><br>
+
+      But in RL, we want to learn from the environment when we are given no knowledge about r or p. This poses a new challenge. We have to balance exploring (learning new things) vs. exploiting (leveraging the things we already know) to do well.
+
+      <h4>Two Main Approaches</h4>
+
+      <b>Model-Based.</b> We try to learn a model of the environment, which allows us to predict what the next state and reward will be. Then planning is used to decide how to act based on the estimated model.<br><br>
+
+      If the reward or transition structure changes, model-based learning is good at absorbing these changes into its model. However, model-based learning is computationally expensive.<br><br>
+
+      <b>Model Free.</b><br><br> We don’t try to learn a model. Instead, we directly learn a policy or an action-value function. We will refer to the action-value function as the “Q-function”.<br><br>
+
+      Model-free learning is much simpler and cheaper, but if the environment changes, we have to do a lot more acting and exploring again to learn the changes.<br><br>
+
+      <h4>Value-Based Methods for Model-Free RL: Definitions</h4>
+      In model-free RL, we will try to learn a Q-function. Note that we can have $Q^{\pi}$ for a specific policy $\pi$:
+
+      $$Q^{\pi}(s,a) = r(s,a) + \gamma\sum_{s’} p(s’ | s, a)V^{\pi}(s’)$$
+
+      This is the value of taking action a, then following policy $\pi$ for future steps. It looks similar to our previous value functions, but there’s a key difference. In the value function expression $V(s)$, we didn’t input an action; the value function automatically assumes we will be following the optimal action at that step. In this Q-function, we provide both a state and an action, so we can have a value for an action even if it isn’t optimal.<br><br>
+
+      We also have the optimal Q-function:
+
+      $$Q^{*}(s,a) = r(s,a) + \gamma\sum_{s’} p(s’ | s, a)V^{*}(s’)$$
+
+      Then the optimal policy comes from picking the action with the best Q-value at each state:
+
+      $$\pi^* = \arg\max_a Q^*(s,a)$$
+
+      The Bellman Equation for $Q^*$ is
+      $$Q^*(s,a) = r(s,a) + \gamma\sum_{s’} p(s’ | s,a)\max_{a’}Q^*(s’, a’)$$
+
+      Here, $$\max_{a’}Q^*(s’, a’) = V^*(s’)$$.
+
+      <h4>Value-Based Methods for Model-Free RL: Algorithms</h4>
+
+      A general framework for today’s RL algorithms is to 1) initialize a $|S| \times |A|$ table of the Q-values $Q(s,a)$, then 2) repeatedly choose an action based on the Q-values, and use the data we collect from this action to update our Q-table (and therefore also our approximation of $Q^*$). <br><br>
+
+      In each step, the data collected is of the form $s, a, r, s’, a’$: $s$ is the current state, $a$ is the action the agent took, $r$ is the reward received, $s’$ is the next state, and $a’$ is what the current policy recommends for the next action (including random random actions from the $\epsilon$-greedy feature). Note that we do not have access to the reward function or the transition matrix, but as the agent moves in the environment, it collects data about the reward it received and the state it found itself in next.<br><br>
+
+      Our agent decides how to act in an $\epsilon$-greedy manner. This means it follows a policy that takes the optimal action (based on previous observations) with probability $1 - \epsilon$, and chooses a random action to explore with probability $\epsilon$: 
+
+      $$\pi(s) = \begin{cases}
+      \arg\max_a Q(s,a) & \text{w.p. } 1 - \epsilon \\
+      \text{Random} & \text{w.p. } \epsilon
+      \end{cases}$$
+
+      We will learn $Q^*$ through “temporal difference updates”.<br><br>
+
+      <b>Option 1: SARSA.</b> Each time we get a new experience $(s,a,r,s’,a’)$ (this is where the name SARSA comes from), we make the following Q-update:
+
+      $$Q(s,a) \leftarrow Q(s,a) + \alpha_t[r + \gamma Q(s’,a’) - Q(s,a)]$$
+
+      $\alpha_t$ is a learning rate that can vary based on how many steps have passed so far. $r + \gamma Q(s’,a’)$ is our one-step estimate of $Q^{\pi(s,a)}$. We take the difference between this value and $Q(s,a)$, the estimated Q-value made by our current Q-function. Then we update our Q-function based on this difference, which is kind of like a gradient descent update.<br><br>
+
+      <b>Option 2: Q-learning.</b> Each time we get a new experience $(s,a,r, s’)$, do the following update (we ignore the $a’$ in the observation that SARSA uses and just use the first four components):
+
+      $$Q(s,a) \leftarrow Q(s,a) + \alpha_t[r + \gamma \max_{a’}Q(s’, a’) - Q(s,a)]$$
+
+      These update steps look pretty similar. The crucial difference is the presence of the max in the second version. In Q-learning, we take the Q-value for the best next step, by taking the max over all possible $a’$. In SARSA, we update our Q-function as though the only option for the next action is $a’$, the action recommended by the current policy. <br><br>
+
+      SARSA is known as on-policy because it estimates $Q^{\pi}$ following the current policy when it only considers $a’$ in the update. This is like saying our Q-functions updates must stay faithful to what action we would actually take when we followed our policy. Q-learning is called off-policy because its estimate for the $Q$-value might use a next action different than what we’d actually take if we followed the current policy. In other words, it estimates the optimal $Q^*$ while following $\pi$. Q-learning converges to $Q^*$ as long as (s,a) are visited often enough. <br><br>
+
+      To read more about SARSA, Q-learning, and the difference between them, see 6.4 and 6.5 in the Sutton & Barto RL textbook.
+
+</section>

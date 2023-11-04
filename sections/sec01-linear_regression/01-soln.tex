@@ -1,0 +1,495 @@
+\documentclass[11pt,letterpaper]{article}
+
+\usepackage{common}
+\usepackage{amsmath,amsfonts,amssymb,bbm}
+\usepackage{palatino}
+\usepackage[linkcolor=blue]{hyperref}
+\usepackage{fullpage}
+\usepackage{color}
+\usepackage{enumitem}
+\usepackage{titlesec}
+\usepackage[textsize=tiny]{todonotes}
+\newcommand{\TODO}[1]{\todo[inline]{#1}}
+\newcommand{\R}{\mathbbm{R}}
+\newcommand{\mba}{\mathbf{a}}
+\newcommand{\mbb}{\mathbf{b}}
+\newcommand{\mbx}{\mathbf{x}}
+\newcommand{\mbxt}{\tilde{\mathbf{x}}}
+\newcommand{\Sigmat}{\tilde{\Sigma}}
+\newcommand{\mbz}{\mathbf{z}}
+\newcommand{\mbw}{\mathbf{w}}
+\newcommand{\eps}{\epsilon}
+\newcommand{\Ut}{\tilde{U}}
+\newcommand{\angstrom}{\textup{\AA}}
+\newcommand{\E}{\mathrm{E}}
+\newcommand{\Var}{\mathrm{Var}}
+\newcommand{\p}{\partial}
+
+%\usepackage[margin=0.90in]{geometry}
+
+\begin{document}
+\begin{center}
+\LARGE{CS 181 Spring 2022 Section 1 Notes:\\
+Nonparametric Regression, Linear Regression, MLE}
+\end{center}
+
+\section{Types of Learning}
+\subsection{Takeaways}
+\begin{enumerate}
+    \item Supervised - we are given the labels $\mathbf{y}$ during training. There are two main types.
+    \begin{enumerate}
+        \item Regression - labels $\mathbf{y}$ are continuous real numbers (usually, e.g. predict future stock price in dollars).
+        \item Classification - labels $\mathbf{y}$ are discrete and categorical (e.g. is this a picture of a pig, panda, or parakeet?).  
+    \end{enumerate}
+    \item Unsupervised - we are \emph{not} given the labels $\mathbf{y}$ during training, and are only provided with the input data $\mathbf{x}$. Why would we even do unsupervised learning at all then? Well, generally, we use unsupervised learning to find out more about the construction of our data, relationships between our data, and ``important" features of our data. Some examples of unsupervised learning include:
+    \begin{enumerate}
+        \item Clustering - finding natural groupings of our data.
+        \item PCA - projecting high dimensional data into lower dimensions (we'll discuss why this is important in the future).
+    \end{enumerate}
+    \item Reinforcement Learning (RL) - we'll save this one for later! In summary, RL can be broken down into $(states, actions, rewards)$. Many strategy game bots (any StarCraft folks?) are designed using RL.
+\end{enumerate}
+
+\section{KNN and Kernelized Regression}
+
+\subsection{K-Nearest Neighbors (KNN)}
+\begin{enumerate}
+    \item KNN is considered a form of non-parametric regression. Intuitively, for a fixed value of K=k, there are no parameters that we have to tune (i.e., no weights that we have to learn). More rigorously, non-parametric means that we do not make any assumptions about the parameters / characteristics of our data (in context, this means that we do not assume an underlying probability distribution).
+    \item Rundown of the KNN Algorithm:
+    \begin{enumerate}
+        \item Let $\matbf{x^*}$ be the point that we would like to make a prediction about. Let's find the $k$ nearest points $\{\mathbf{x}_1, \dots \mathbf{x}_k\}$ to $\mathbf{x^*}$, based on some predetermined distance function.
+        \item Denote the true $y$ values of these $k$ points as $\{y_1, \dots y_k \}$.
+        \item Output our prediction $\hat{y}^*$ for our point of interest $\mathbf{x^{*}}$:
+        $$\hat{y}^* = \frac{\displaystyle\sum_{i=1}^{k}y_{k}}{k}$$
+        
+        Remark: the little ``hat" in $\hat{y}^*$ is just notation telling us that this is our \emph{prediction}, rather than the true $y$ value.
+    \end{enumerate}
+\end{enumerate}
+
+\subsection{Kernelized Regression}
+
+Note: You might come across this concept under the name kernel-weighted average regression.
+\begin{enumerate}
+    \item Kernelized Regression is considered to be a smoother, more general extension of KNN.
+    \item Let $k(\mathbf{x^*}, \mathbf{x}_n)$ be our ``kernel function." In Kernelized Regression, we want to take a \emph{weighted average} of all the points in our training data when outputting our prediction for an unknown point. Intuitively, we want to weigh points that are ``closer" to our unknown point of interest \emph{more heavily} than points that are ``farther" away. As such, our kernel function $k(\mathbf{x^*}, \mathbf{x_n})$ should be \emph{larger} for a point $\mathbf{x_n}$ closer to our point of interest $\mathbf{x^{*}}$ than a point $\mathbf{x_n}$ farther away.
+    \item Importantly, the following should always hold:
+    $$\textnormal{arg}\max_{\mathbf{x}} k(\mathbf{x^*}, \mathbf{x}) = \mathbf{x^{*}}$$
+    Remark: What the above statement means is that ``the value of $\mathbf{x}$ that results in the largest value of $k(\mathbf{x^*}, \mathbf{x})$ should be $\mathbf{x^{*}}$ itself".
+    \item Rundown of the Kernelized Algorithm:
+    \begin{enumerate}
+        \item Let $\{\mathbf{x}_1, \dots \mathbf{x}_N\}$ (and their corresponding $y$ values) be \emph{all} of the $N$ points comprising our training data set. \item Let $\mathbf{x^{*}}$ be our point of interest that we want to make a prediction for. We make our prediction as follows:
+        $$\hat{y}^* = \frac{\displaystyle\sum_{i=1}^{N}k(\mathbf{x^{*}}, \mathbf{x}_i) \cdot y_{i}}{\displaystyle\sum_{j=1}^{N}k(\mathbf{x^{*}}, \mathbf{x}_j)}$$
+        
+        Remark: notice how we include \emph{all} points of the training data in our calculation?
+        
+        Remark: we have to include the denominator term in order to normalize the sum of our weights to equal $1$.
+    \end{enumerate}
+\end{enumerate}
+
+\section{Least Squares (Linear) Regression}
+\subsection{Takeaways}
+\subsubsection{Linear Regression}
+The simplest model for regression involves a linear combination of the input variables:
+\begin{align}
+    h(\mathbf{x};\mathbf{w})= w_1x_1+w_2x_2+\ldots+w_D x_D = \sum_{d=1}^D w_d x_d = \mathbf{w}^\top\mathbf{x}
+\end{align}
+where $x_j \in \mathbb{R}$ for $j \in \{1,\hdots, D\}$ are the features, $\mathbf{w} \in \mathbb{R}^D$ is the weight parameter, with $w_1 \in \mathbb{R}$ being the bias parameter.
+Recall the trick of letting $x_1 = 1$ to merge bias.
+
+\subsubsection{Least Squares Loss Function}
+The least squares loss function assuming a basic linear model is given as follows:
+\begin{align}
+    \mcL(\mathbf{w}) &=\dfrac{1}{2}\sum_{n=1}^N\left(y_n - \mathbf{w}^\top\mathbf{x}_n \right)^2
+\end{align}
+
+\noindent For regularized regression, such as LASSO (L1) or Ridge (L2) regression, we use a different loss function with an added penalty term. The L1 penalty is $\lambda \|\mathbf{w}\|_1$, and the L2 penalty is $\lambda \|\mathbf{w}\|_2^2$.\\
+
+\noindent A few remarks on notation:
+\begin{enumerate}
+    \item Let $\mathbf{w} = \{w_1, w_2, \dots, w_D\}$
+    \item LASSO (L1) Regularization (written out):
+    $$\lambda|\mathbf{w}| = \lambda\bigg(\sum_{i=1}^{D} |w_i|\bigg)$$
+    
+    Note: $|\mathbf{w}|$ means the same thing as $\|\mathbf{w}\|_{1}$, depending on textbook/region.
+    \item Ridge (L2) Regularization (written out):
+    $$\lambda\|\mathbf{w}\|_{2}^{2} = \lambda \cdot \left(\sqrt{w_1^{2} + \dots + w_{D}^{2}}\right)^{2} = \lambda \dot \left(w_1^{2} + \dots + w_{D}^{2}\right)$$
+\end{enumerate}
+Remark: $ \|\mathbf{w}\|$ means the ``norm" of $\mathbf{w}$. Usually, this means the L2 norm. In most contexts, $\|\mathbf{w}\|$ means the same thing as $\|\mathbf{w}\|_{2}$.\\
+    
+\noindent Remark: occasionally, you may see a $\frac{\lambda}{2}$ instead of $\lambda$. Conceptually, these two conventions are very similar. The dividing by $2$ just helps us make things a little bit nicer when we take the derivative.
+
+
+\subsubsection{Optimizing Weights to Minimize Loss Function}
+
+In class, we briefly discussed how to find the weights that minimize the least squares loss function. Let us derive the end result from scratch again, in more detail. This will be a good exercise for future problem sets and topics.\\
+
+\noindent Some important notes on notation and dimensions:
+\begin{enumerate}
+    \item In this class, if $y \in \R$ and $\mathbf{x} \in \R^{n}$, then
+    $$\frac{dy}{d\mathbf{x}} = \begin{bmatrix}
+    \frac{\partial y}{\partial x_1} \\
+    \frac{\partial y}{\partial x_2} \\
+    \vdots \\
+    \frac{\partial y}{\partial x_n}
+    \end{bmatrix}$$
+    Note that this derivative is a \emph{column} vector!
+    \item If $\mathbf{y} \in \R^{m}$ and $\mathbf{x} \in \R^{n}$, then
+    $$\frac{d\mathbf{y}}{d\mathbf{x}} = \begin{bmatrix}
+    \frac{\partial y_1}{\partial x_1} & \frac{\partial y_2}{\partial x_1} & \cdots & \frac{\partial y_m}{\partial x_1} \\
+    \frac{\partial y_1}{\partial x_2} & \frac{\partial y_2}{\partial x_2} & \cdots & \frac{\partial y_m}{\partial x_2} \\
+    \vdots & \vdots & \ddots & \vdots \\
+    \frac{\partial y_1}{\partial x_n} & \frac{\partial y_2}{\partial x_n} & \cdots & \frac{\partial y_m}{\partial x_n}
+    \end{bmatrix}$$
+    Note that this derivative is basically like stacking the $\frac{dy_i}{d\mathbf{x}}$ column vectors together like ``books on a bookshelf!"
+    \item By convention, we will treat our vector of $y$-values, $\mathbf{y}$, as a \emph{column} vector. We will also treat our weight vector, $\mathbf{w}$, as a \emph{column} vector. Finally, we will treat each $\emph{individual}$ data point $\mathbf{x}_i$ as a column vector.
+    \item \emph{However}, we will treat our data matrix $\mathbf{X}$ (of all the individual data points $\mathbf{x_i}$ combined together), which is also called a ``design matrix," as follows. This is not a typo:
+    $$\mathbf{X} = \begin{bmatrix}
+    \leftarrow\mathbf{x_1}^{T}\rightarrow \\
+    \leftarrow\mathbf{x_2}^{T}\rightarrow \\
+    \vdots \\
+    \leftarrow\mathbf{x_n}^{T}\rightarrow
+    \end{bmatrix} 
+    =
+    \begin{bmatrix}
+    x_{11} & \cdots & x_{1D} \\
+    x_{21} & \cdots & x_{2D} \\
+    \vdots & \ddots & \vdots \\
+    x_{n1} & \cdots & x_{nD} \\
+    \end{bmatrix}.$$
+    $D$ is the number of dimensions in our data (i.e., the dimensions of each data point $\mathbf{x_i}$).
+    
+\end{enumerate}
+
+% fully explain how to minimize.
+\noindent Now, let us find the weights that minimize the least squares loss function.
+\begin{enumerate}
+    \item We begin with our loss function:
+    $$\mcL(\mathbf{w}) =\dfrac{1}{2}\sum_{n=1}^N\left(y_n - \mathbf{w}^\top\mathbf{x}_n \right)^2$$
+    \item A few remarks on this loss function:
+    \begin{enumerate}
+        \item $\hat{y_n} = \mathbf{w}^\top\mathbf{x}_n$ is our predicted $y$ value for each $\mathbf{x}_n$, under linear regression. Thus, our loss function could also be written as the following for intuition:
+        $$\mcL(\mathbf{w}) =\dfrac{1}{2}\sum_{n=1}^N\left(y_n - \hat{y_n} \right)^2$$
+        \item The presence of the $\frac{1}{2}$ is just to make things neater when we take the derivative.
+        \item The loss function itself outputs a \emph{scalar} value! The total loss is \emph{always} a scalar real value, and \emph{not} vector!
+    \end{enumerate}
+    \item To find $\mathbf{w}$ that minimizes our loss function, we take the derivative of the loss function (again, a scalar) with respect to $\mathbf{w}$ and set the derivative equal to $0$. By the power, sum (across the summation), and chain rules, we have the following:
+    $$\frac{d\mcL}{d\mathbf{w}} = \sum_{n=1}^N \bigg((y_n - \mathbf{w}^\top\mathbf{x}_n) \cdot \frac{d(y_n - \mathbf{w}^\top\mathbf{x}_n)}{d\mathbf{w}}\bigg) = 0$$
+    \item Let's look at that inner derivative a bit more closely. This is a good example of how to think through a matrix derivative. By rules from single variable calculus, we have:
+    $$\frac{d(y_n - \mathbf{w}^\top\mathbf{x}_n)}{d\mathbf{w}} = \frac{d(- \mathbf{w}^\top\mathbf{x}_n)}{d\mathbf{w}} = -\frac{d(\mathbf{w}^\top\mathbf{x}_n)}{d\mathbf{w}}$$
+    Note that $\mathbf{w}^\top\mathbf{x}_n$ is a scalar function, while $\mathbf{w}$ is a vector. Thus, our resultant derivative should be a column vector. We rewrite the following for intuition: $$\mathbf{w}^\top\mathbf{x}_n = w_1 x_{n1} + w_2 x_{n2} + \dots + w_D x_{nD}$$
+    For any arbitrary element of $\mathbf{w}$, which we'll call $w_i$, we have, via single variable calculus:
+    $$\frac{d(\mathbf{w}^\top\mathbf{x}_n)}{dw_i} = x_{ni}$$
+    From our notational conventions previously combined with our observation directly above,
+    $$\frac{d(\mathbf{w}^\top\mathbf{x}_n)}{d\mathbf{w}} = 
+    \begin{bmatrix}
+    \frac{\partial (\mathbf{w}^\top\mathbf{x}_n)}{\partial w_1} \\
+    \frac{\partial (\mathbf{w}^\top\mathbf{x}_n)}{\partial w_2} \\
+    \vdots \\
+    \frac{\partial (\mathbf{w}^\top\mathbf{x}_n)}{\partial w_D}
+    \end{bmatrix} = 
+    \begin{bmatrix}
+    x_{n1} \\
+    x_{n2} \\
+    \vdots \\
+    x_{nD}
+    \end{bmatrix} = \mathbf{x}_n$$
+    \item Now, going back to our derivative of the loss function with respect to $\mathbf{w}$, we have:
+    $$\frac{d\mcL}{d\mathbf{w}} = \sum_{n=1}^N \bigg((y_n - \mathbf{w}^\top\mathbf{x}_n) \cdot \frac{d(y_n - \mathbf{w}^\top\mathbf{x}_n)}{d\mathbf{w}}\bigg) = 
+    \sum_{n=1}^N \bigg((y_n - \mathbf{w}^\top\mathbf{x}_n) \cdot -\frac{d(\mathbf{w}^\top\mathbf{x}_n)}{d\mathbf{w}}\bigg) = 0$$
+    $$\frac{d\mcL}{d\mathbf{w}} = \sum_{n=1}^N \bigg((y_n - \mathbf{w}^\top\mathbf{x}_n) \cdot -\mathbf{x}_n\bigg) = \sum_{n=1}^N \bigg(-y_n \mathbf{x}_n + (\mathbf{w}^\top\mathbf{x}_n)\mathbf{x}_n\bigg) = 0$$
+    Equivalent, we can move the negative terms to the right hand side (RHS):
+    $$\sum_{n=1}^N (\mathbf{w}^\top\mathbf{x}_n)\mathbf{x}_n = \sum_{n=1}^N y_n \mathbf{x}_n$$
+    \item Note that $\mathbf{w}^\top\mathbf{x}_n$ is a \emph{scalar}, and that $\mathbf{w}^\top\mathbf{x}_n = \mathbf{x}_n^{T}\mathbf{w}$. This is important because we can left-multiply or right-multiply by scalars however we want:
+    $$\sum_{n=1}^N (\mathbf{w}^\top\mathbf{x}_n)\mathbf{x}_n = \sum_{n=1}^N (\mathbf{x}_n^{T}\mathbf{w})\mathbf{x}_n = \sum_{n=1}^N \mathbf{x}_n (\mathbf{x}_n^{T}\mathbf{w})=\sum_{n=1}^N y_n \mathbf{x}_n$$
+    \item One key observation is that $\mathbf{w}$ does \emph{not} depend on the value of our index variable $n$ in the summation! Thus, we can take it out of our summation:
+    $$\sum_{n=1}^N \mathbf{x}_n (\mathbf{x}_n^{T}\mathbf{w}) = \bigg(\sum_{n=1}^N \mathbf{x}_n \mathbf{x}_n^{T}\bigg)\mathbf{w}$$
+    \item Remember our ``design matrix" $\mathbf{X}$ from earlier? Also, recall that $\mathbf{y}$ is a \emph{column} vector! If we draw out $\mathbf{X}$, $\mathbf{X}^{T}$, and $\mathbf{y}$, we will soon notice that
+    $$\mathbf{X}^{T}\mathbf{y} = \sum_{n=1}^N y_n \mathbf{x}_n = \sum_{n=1}^N \mathbf{x}_n y_n$$
+    \item If we draw out $\mathbf{X}$ and $\mathbf{X}^{T}$, we will realize that
+    $$\sum_{n=1}^N \mathbf{x}_n \mathbf{x}_n^{T} = \mathbf{X}^{T}\mathbf{X}$$
+    And of course,
+    $$\bigg(\sum_{n=1}^N \mathbf{x}_n \mathbf{x}_n^{T}\bigg)\mathbf{w} = \bigg(\mathbf{X}^{T}\mathbf{X}\bigg)\mathbf{w}$$
+    \item Putting our LHS and RHS together, we have:
+    $$\bigg(\sum_{n=1}^N \mathbf{x}_n \mathbf{x}_n^{T}\bigg)\mathbf{w} = \sum_{n=1}^N \mathbf{x}_n y_n \Leftrightarrow \bigg(\mathbf{X}^{T}\mathbf{X}\bigg)\mathbf{w} = \mathbf{X}^{T}\mathbf{y}$$
+    \item Taking the liberty to assume that $\mathbf{X}^{T}\mathbf{X}$ is invertible, we can isolate $\mathbf{w}$:
+    $$\mathbf{w}^{*} = \bigg(\mathbf{X}^{T}\mathbf{X}\bigg)^{-1}\mathbf{X}^{T}\mathbf{y}$$
+    
+    The little $*$ in $\mathbf{w^{*}}$ just means that these are the \emph{optimal} weights, as opposed to any generic set of weights.
+\end{enumerate}
+In short, if we minimize our least squares loss function with respect to the weights, we get the following solution:
+\begin{align}
+    \mathbf{w}^* &= (\mathbf{X}^\top\mathbf{X})^{-1}\mathbf{X}^\top\mathbf{y} = \argmin_{\mathbf{w}} \mcL(\mathbf{w})
+\end{align}
+where $\mathbf{X} \in \reals^{N \times D}$. Each row represents one data point and each column represents values of one feature across all the data points. In practice, gradient descent is often used to compute $w^*$. Today, we just got super lucky that there was a clean-cut closed-form analytical solution. \footnote{ Note: $(\mathbf X^T \mathbf X)^{-1}$ is invertible iff $X$ is full column rank (i.e. rank $D$, which implies $N \ge D$). \textbf{What if} $(\mathbf X^T \mathbf X)^{-1}$ \textbf{is not invertible?} Then, there is not a unique solution for $w^*$. If $d > N$, computing the pseudoinverse of $\mathbf X^T \mathbf X$ will find one solution. Alternatively, in general applying ridge regression can fix the invertibility issue.}
+%\vspace{1mm}
+
+% \subsubsection{Maximum Likelihood}
+
+% Given a model (i.e. linear regression), we can optimize its parameters with respect to a desired loss function The
+\subsection{Concept Question}
+How is a model (such as linear regression) related to a loss function (such as least squares)?
+%\vspace{5mm}
+
+\begin{itemize}
+    \item The model (of the data) and the loss functions are both important pieces to the ML pipeline, but they are distinct. The model describes how you believe the data is related and/or generated. Very commonly, you will be optimizing over a family of models. The loss function measures how well a specific model (i.e. with specific parameters) fits the data, and it is used in the previously mentioned optimization. 
+    \item Least squares and linear regression are often used together, especially since there are theoretical justifications (i.e. MLE connection) to why least squares is a good loss function for linear regression. However, you do $\mathbf{not}$ have to use them together. Another loss function that could be used with linear regression is an absolute difference (L1) loss.
+\end{itemize}
+\vspace{25mm}
+
+
+\subsection{Exercise: Practice Minimizing Least Squares}
+\fbox{\parbox{\linewidth}{%
+Let $\mathbf{X} \in \reals^{N \times {D-1}}$ be our design matrix, $\mathbf{y}$ our vector of $N$ target values, $\mathbf{w}$ our vector of $D-1$ parameters, and $w_0$ our bias parameter. The least squares error function of $\mathbf{w}$ and $w_0$ can be written as follows
+\begin{align*}
+    \mcL(\mathbf{w},w_0) = \frac{1}{2} \sum_{n=1}^N \left( y_n - w_0 - \sum_{d=1}^{D-1} w_d X_{nd} \right)^2.
+\end{align*} \\
+
+
+Find the value of $w_0$ that minimizes $\mcL$. Can you write it in both vector notation and summation notation? Does the result make sense intuitively?
+
+\vspace{3mm} 
+\textbf{Solution:}
+We minimize by finding gradient w.r.t $w_0$, setting to $0$, and solving.
+\begin{align*}
+    \frac{\partial L}{\partial w_0} &= -\sum_{n=1}^N (y_n - w_0 - \sum_{d=1}^{D-1} w_d X_{nd}) = 0 \\
+    N w_0^* &= \sum_{n=1}^N \left(y_n - \sum_{d=1}^{D-1} w_d X_{nd}\right) \\
+    w_0^* &= \frac 1 N \left[ \left(\sum_{n=1}^N y_n \right) - \sum_{n=1}^N \sum_{d=1}^{D-1} w_d X_{nd}\right] \\
+    &= \frac{1}{N} \left( \mathbf{y}^\top \mathbf{1} - \sum_{n=1}^{N} \mathbf{w}^\top \mathbf{x}_n\right)
+\end{align*}
+
+The result makes sense intuitively as it is the average deviation of the outputs from the predictions.
+
+\vspace{50mm}
+% \begin{align*}
+%     w_{0}^* &= \frac{1}{n} \sum_{i=1}^n y_i - \frac{1}{n}\sum_{j=1}^{m-1} w_j \left( \sum_{i=1}^n X_{ij} \right) \\
+%     &= \frac{1}{n} \left( \mathbf{y}^\top \mathbf{1} - \sum_{i=1}^{n} \mathbf{w}^\top \mathbf{x}_i\right)  \quad \quad \quad \text{[compare Bishop (3.19)]}
+%     % &= \frac{1}{n}\sum_{i=1}^n \left( y_i - \sum_{j=1}^{m-1} w_j \mathbf{X}_{ij} \right) \quad \quad \quad \text{[compare Bishop (3.19)]}
+% \end{align*}
+
+
+}}
+
+\section{Linear Basis Function Regression}
+\subsection{Takeaways}
+We allow $h(\mathbf{x};\mathbf{w})$ to be a non-linear function of the input vector $\mathbf{x} \in \mathbb{R}^D$, while remaining linear in $\mathbf{w} \in \mathbb{R}^M$ by using a basis function $\phi : \mathbb{R}^D \to \mathbb{R}^M$. The resulting basis regression model is below:
+\begin{align}
+    h(\mathbf{x};\mathbf{w})= \sum_{m = 1}^{M}w_m \phi_m(\mathbf{x})
+    =\mathbf{w}^\top\mathbf{\bphi}(\mathbf{x})
+\end{align}
+To merge the bias term, we can define $\phi_1(\mathbf{x})=1$. Some examples of basis functions include polynomial $\phi_m(x) = x^m$, Fourier $\phi_m(x) = \cos( m \pi x )$, and Gaussian $\phi_m(x) = \exp \{- \frac{(x - \mu_m)^2}{2s^2}\}$.
+
+\subsection{Concept Questions}
+\begin{itemize}
+    \item What are some advantages and disadvantages to using linear basis function regression to basic linear regression? 
+    \item How do we choose the bases?
+\end{itemize}
+
+\noindent Basis functions allow us to capture nonlinear relations that may exist in the data, which linear functions can not. There is, however, a greater risk of overfitting with the more flexible linear basis function regression - more on this in the upcoming weeks in lecture with bias-variance tradeoff.\\
+
+\noindent We can choose the bases with expert domain knowledge, or they could even be learned themselves... (foreshadowing neural nets).\\
+
+\noindent We don't talk about feature engineering and incorporating expert domain knowledge too much in this class; however, these are vital in real world situations for good performance. The practical assignment and pset problems may touch on this.
+
+\section{Maximum Likelihood Estimation (Prep for Future + Pset)}
+\subsection{Takeaways}
+\begin{itemize}
+    \item Given a model and observed data, the \textbf{maximum likelihood estimate} (of the parameters) is the estimate that maximizes the probability DENSITY of seeing the observed data under the model.
+    \item  It is obtained by maximizing the \textbf{likelihood function}, which is the same as the joint pdf of the data, but viewed as a function of the parameters rather than the data.
+    \item Since log is monotonic function, we will often maximize the \textbf{log likelihood} rather than the likelihood as it is easier (turns products from independent data into sums) and results in the same solution.
+\end{itemize}
+
+\subsection{Exercise: MLE for Gaussian Data}
+\fbox{\parbox{\linewidth}{%
+We are given a data set $(\mathbf{x}_1, \ldots, \mathbf{x}_n)$ where each observation is drawn independently from a multivariate Gaussian distribution:
+
+\begin{align}
+\mathcal{N}(\mathbf{x}| \boldsymbol{\mu}, \mathbf{\Sigma}) = \dfrac{1}{|(2\pi)\mathbf{\Sigma}|^{1/2}}\exp\left(-\dfrac{1}{2}(\mathbf{x} - \boldsymbol{\mu})^\top\mathbf{\Sigma}^{-1}(\mathbf{x} - \boldsymbol{\mu})\right)
+\end{align}
+where $\boldsymbol{\mu}$ is a $m$-dimensional mean vector, $\mathbf{\Sigma}$ is a $m$ by $m$ covariance matrix, and $|\mathbf{\Sigma}|$ denotes the determinant of $\mathbf{\Sigma}$. Find the maximum likelihood value of the mean, $\boldsymbol \mu_{MLE}$.
+
+\vspace{3mm}
+\textbf{Solution:}
+We find the MLE by maximizing the log likelihood:
+\begin{align*}
+l( \boldsymbol{\mu}, \mathbf{\Sigma}; \mathbf{x}) &= \log \left(\prod_{i=1}^n \mathcal{N}(\mathbf{x}_i| \boldsymbol{\mu}, \mathbf{\Sigma}) \right) = \sum_{i=1}^n \log(\mathcal{N}(\mathbf{x}_i| \boldsymbol{\mu}, \mathbf{\Sigma})) \\
+&= -\dfrac{n}{2}\log(2\pi) - \dfrac{n}{2}\log(|\mathbf{\Sigma}|) -\dfrac{1}{2}\sum_{i=1}^n(\mathbf{x}_i - \boldsymbol{\mu})^\top\mathbf{\Sigma}^{-1}(\mathbf{x}_i - \boldsymbol{\mu})
+\end{align*}
+Taking the derivative (matrix cookbook ch 2.4 eqn 78) with respect to $\boldsymbol{\mu}$ and setting it equal to 0, we get \begin{align*}
+0 = \dfrac{\partial l}{\partial \boldsymbol{\mu}} = \sum_{i=1}^n \mathbf{\Sigma}^{-1}(\mathbf{x}_i - \boldsymbol{\mu})
+\end{align*}
+and solving gives us that 
+\begin{align*}
+\boldsymbol{\mu}_{MLE} = \dfrac{1}{n}\sum_{i=1}^n \mathbf{x}_i.
+\end{align*}
+}}
+\vspace{80mm}
+
+
+
+
+
+% In many practical applications, if original data variables comprise $\mathbf{x}$, then the features can be expressed in terms of the basis functions $\{\phi_j{\mathbf{x}}\}$.
+
+% \newpage
+% \section{Practice Questions}
+% \begin{enumerate}
+
+% \item {\bf MLE Estimate of the Bias Term (Bishop (3.19))}\\
+% \fbox{\parbox{\linewidth}{%
+% Let $\mathbf{X} \in \reals^{n \times m}$ be our design matrix, $\mathbf{y}$ our vector of $n$ target values, $\mathbf{w}$ our vector of $m-1$ parameters, and $w_0$ our bias parameter. As Bishop notes in (3.18), the least squares error function of $\mathbf{w}$ and $w_0$ can be written as follows
+% \begin{align*}
+%     \mcL(\mathbf{w},w_0) = \frac{1}{2} \sum_{i=1}^n \left( y_i - w_0 - \sum_{j=1}^{m-1} w_j X_{ij} \right)^2.
+% \end{align*} \\
+
+% Show that the value of $w_0$ that minimizes $\mcL$ is
+% \begin{align*}
+%     w_{0}^* &= \frac{1}{n} \sum_{i=1}^n y_i - \frac{1}{n}\sum_{j=1}^{m-1} w_j \left( \sum_{i=1}^n X_{ij} \right) \\
+%     &= \frac{1}{n} \left( \mathbf{y}^\top \mathbf{1} - \sum_{i=1}^{n} \mathbf{w}^\top \mathbf{x}_i\right)  \quad \quad \quad \text{[compare Bishop (3.19)]}
+%     % &= \frac{1}{n}\sum_{i=1}^n \left( y_i - \sum_{j=1}^{m-1} w_j \mathbf{X}_{ij} \right) \quad \quad \quad \text{[compare Bishop (3.19)]}
+% \end{align*}
+% and justify the result intuitively.
+% }}
+% % % STAFF SOLUTION
+% % We have that $\frac{\partial L}{\partial w_0} = -\sum_{i=1}^n (y_i - w_0 - \sum_{j=1}^{m-1} w_j X_{ij})$. 
+
+% % Thus, we set $\sum_{i=1}^n y_i - nw_0 - \sum_{i=1}^n \sum_{j=1}^{m-1} w_j X_{ij} = 0$, and solving for $w_0$ gives the result.
+
+% \newpage
+% % \item {\bf Linear Regression With Differing Variances (Adapted from Stanford CS 229)}\\
+% % %http://cs229.stanford.edu/materials/ps1sol.pdf
+% % \fbox{\parbox{\linewidth}{%
+% % Suppose we have a training set $\{\mathbf{x}_i\}_1^n$ of $n$ independent examples with corresponding target values $\{y_i\}_1^n$, but in which the $y_i$'s were observed with differing variances. Specifically, suppose that
+% % \begin{align*}
+% %     p(y_i|\mathbf{x}_i, \mathbf{w}) = \dfrac{1}{\sqrt{2\pi}\sigma_i}\exp{\left(-\dfrac{(y_i-\mathbf{w}^\top\mathbf{x}_i)^2}{2\sigma_i^2}\right)}
+% % \end{align*}
+% % i.e., $y_i$ has mean $\mathbf{w}^\top\mathbf{x}_i$ and variance $\sigma_i^2$ (where the $\sigma_i$'s are fixed, known constants). Show that finding the maximum likelihood estimate of $\mathbf{w}$ reduces to solving a weighted linear regression problem. State clearly what the $r_i$'s (weighting factors) are in terms of the $\sigma_i$'s. 
+% % }}
+% % \begin{align*}
+% %     \argmax_{\mathbf{w}} \prod_{i=1}^n p(y_i|\mathbf{x}_i, \mathbf{w}) &= \argmax_{\mathbf{w}} \sum_{i=1}^{n}\log p(y_i|\mathbf{x}_i, \mathbf{w})\\
+% %     &= \argmax_{\mathbf{w}} \sum_{i=1}^{n}\left(\log \dfrac{1}{\sqrt{2\pi}\sigma_i}-\dfrac{(y_i-\mathbf{w}^\top\mathbf{x}_i)^2}{2\sigma_i^2}\right)\\
+% %     &=\argmax_{\mathbf{w}}-\sum_{i=1}^n\dfrac{(y_i-\mathbf{w}^\top\mathbf{x}_i)^2}{2\sigma_i^2}\\
+% %     &=\argmin_{\mathbf{w}}\dfrac{1}{2}\sum_{i=1}^n \dfrac{1}{\sigma_i^2}(y_i-\mathbf{w}^\top\mathbf{x}_i)^2\\
+% %     &=\argmin_{\mathbf{w}}\dfrac{1}{2}\sum_{i=1}^n r_i(y_i-\mathbf{w}^\top\mathbf{x}_i)^2
+% % \end{align*}
+% % where in the last step, we substituted $r_i=\dfrac{1}{\sigma_i^2}$ to get the linear regression form.
+
+% % \newpage
+
+% \item {\bf Maximum Likelihood for the Gaussian (Sequential Estimation of Parameters)}\\
+% \fbox{\parbox{\linewidth}{%
+% (a) We are given a data set $(\mathbf{x}_1, \ldots, \mathbf{x}_n)$ where each observation is drawn independently from a multivariate Gaussian distribution:
+
+% \begin{align}
+% \mathcal{N}(\mathbf{x}| \boldsymbol{\mu}, \mathbf{\Sigma}) = \dfrac{1}{|(2\pi)\mathbf{\Sigma}|^{1/2}}\exp\left(-\dfrac{1}{2}(\mathbf{x} - \boldsymbol{\mu})^\top\mathbf{\Sigma}^{-1}(\mathbf{x} - \boldsymbol{\mu})\right)
+% \end{align}
+% where $\boldsymbol{\mu}$ is a $m$-dimensional mean vector, $\mathbf{\Sigma}$ is a $m$ by $m$ covariance matrix, and $|\mathbf{\Sigma}|$ denotes the determinant of $\mathbf{\Sigma}$.\\
+% \\
+% Find the maximum likelihood value of the mean, $\boldsymbol \mu_{MLE}$.\\
+
+% (b) Let $\boldsymbol \mu_{MLE}^{(n)}$ denote the maximum likelihood estimator of the mean based on $n$ observations. Show that
+% \begin{align}
+% \boldsymbol \mu_{MLE}^{(n)} = \boldsymbol \mu_{MLE}^{(n-1)} + \dfrac{1}{n}(\mathbf{x}_n - \boldsymbol \mu_{MLE}^{(n-1)})
+% \end{align}
+% }}
+
+% % % STAFF SOLUTION
+% % (a) The likelihood of all the data is 
+% % \begin{align*}
+% % \prod_{i=1}^n \mathcal{N}(\mathbf{x}_i| \boldsymbol{\mu}, \mathbf{\Sigma})
+% % \end{align*}
+% % Taking the log, we get that the log likelihood equals:
+% % \begin{align*}
+% % \log \prod_{i=1}^n \mathcal{N}(\mathbf{x}_i| \boldsymbol{\mu}, \mathbf{\Sigma}) 
+% % &= \sum_{i=1}^n \log(\mathcal{N}(\mathbf{x}_i| \boldsymbol{\mu}, \mathbf{\Sigma})) \\
+% % &= -\dfrac{nm}{2}\log(2\pi) - \dfrac{n}{2}\log(|\mathbf{\Sigma}|) -\dfrac{1}{2}\sum_{i=1}^n(\mathbf{x}_i - \boldsymbol{\mu})^\top\mathbf{\Sigma}^{-1}(\mathbf{x}_i - \boldsymbol{\mu})
+% % \end{align*}
+% % Taking the derivative with respect to $\boldsymbol{\mu}$ and setting it equal to 0, we get \begin{align*}
+% % 0 = \dfrac{\partial}{\partial \boldsymbol{\mu}} \log p(\mathbf{X} |\boldsymbol{\mu}, \mathbf{\Sigma}) = \sum_{i=1}^n \mathbf{\Sigma}^{-1}(\mathbf{x}_i - \boldsymbol{\mu})
+% % \end{align*}
+% % and solving gives us that 
+% % \begin{align*}
+% % \boldsymbol{\mu}_{MLE} = \dfrac{1}{n}\sum_{i=1}^n \mathbf{x}_i
+% % \end{align*}
+
+% % (b) 
+% % \begin{align*}
+% % \boldsymbol \mu_{MLE}^{(n)} &= \dfrac{1}{n}\sum_{i=1}^n \mathbf{x}_i \\
+% % &= \dfrac{1}{n}\mathbf{x}_i + \dfrac{1}{n}\sum_{i=1}^{n-1}\mathbf{x}_i\\
+% % &= \dfrac{1}{n}\mathbf{x}_i + \dfrac{n-1}{n}\boldsymbol{\mu}_{MLE}^{(n-1)}\\
+% % &= \boldsymbol \mu_{MLE}^{(n-1)} + \dfrac{1}{n}(\mathbf{x}_i - \boldsymbol \mu_{MLE}^{(n-1)})
+% % \end{align*}
+
+% % Intuition: When we observe a new data point, we revise our estimate by moving our previous estimate over in the direction of the error ($\mathbf{x}_n - \mathbf{\mu}_{MLE}^{(n-1)}$), but scaled by $\frac{1}{n}$ (since this is only one data point out of $n$ total ones).
+
+
+% \newpage
+% \item {\bf OLS on Augmented Data (HTF 3.12 \& MIT 6.867 Fall '12 Recitation Problems)}\\
+% \fbox{\parbox{\linewidth}{%
+% Let $\mathbf{X} \in \reals^{n \times m}$ be our design matrix and $\mathbf{y}$ be our vector of $n$ target values. Assume $\mathbf{X}$ and $y$ are both centered, that is assume the mean of each row is $0$. Let $\tilde{\mathbf{X}}$ be the $(n+m)$ by $m$ matrix formed by vertically stacking $\mathbf{X}$ on top of $\sqrt{\lambda}\mathbf{I}$, and let $\tilde{\mathbf{y}}$ be the $(n+m)$-length vector formed by vertically stacking $\mathbf{y}$ on top of a vector of $m$ zeros.\\
+% That is, let $\tilde{\mathbf{X}} = \begin{bmatrix}
+% X_{11} & \cdots & X_{1m} \\
+% \vdots & \ddots & \vdots \\
+% X_{n1} & \cdots & X_{nm} \\
+% \sqrt{\lambda} & \cdots & 0 \\
+% 0 & \ddots & 0 \\
+% 0 & \cdots & \sqrt{\lambda}
+% \end{bmatrix}$ and $\tilde{y} = \begin{bmatrix}
+% y_1 \\
+% \vdots \\
+% y_n \\
+% 0 \\
+% \vdots \\
+% 0
+% \end{bmatrix}$.
+
+% \begin{itemize}
+% \item[(a)] Show that the least squares error function induced by viewing $\tilde{\mathbf{X}}$ as our design matrix and $\tilde{\mathbf{y}}$ as our target values can be written as \begin{align*}
+% \frac{1}{2} \sum_{i=1}^{n} \left(y_i - \mathbf{w}^\top \mathbf{x}_i \right)^2 + \frac{\lambda}{2} \mathbf{w}^\top\mathbf{w}
+% \end{align*}
+% \item[(b)] Why is this cool?
+% \end{itemize}
+% }}
+
+% % % STAFF SOLUTION
+% % (a) We have 
+% % \begin{align*}
+% % \mcL &= \frac{1}{2} \sum_{i=1}^{n+m} (\tilde{y}_i - \mathbf{w}^\top \tilde{\mathbf{x}}_{i})^2 \\
+% % &= \frac{1}{2} \sum_{i=1}^{n} \left(y_i - \mathbf{w}^\top \mathbf{x}_{i}\right)^2 + \sum_{i=1}^m (0 - w_k \sqrt{\lambda})^2 \\
+% % &= \frac{1}{2} \sum_{i=1}^{n} \left(y_i - \mathbf{w}^\top \mathbf{x}_i \right)^2 + \lambda \mathbf{w}^\top\mathbf{w}
+% % \end{align*}
+
+% % We know from the previous question (and Bishop (3.19)) that this is the Ridge Regression error function (written with the bias parameter made explicit) exactly.
+
+% % (b) We see that adding artificial zero-response data is equivalent to regularizing via Ridge Regression!
+
+% % \newpage 
+% % \item {\bf Deriving Lasso Regularization with Lagrange Multipliers }\\
+% % \fbox{\parbox{\linewidth}{%
+% % Show that minimization of the unregularized least squares error function given by 
+% % \begin{align*}
+% % \mcL_D(\mathbf{w}) = \frac{1}{2}\sum_{i=1}^n (y_i - \mathbf{w}^\top \phi(\mathbf{x}_i) )^2,
+% % \end{align*}
+% % subject to the constraint
+% % \begin{align*}
+% % \sum_{j = 1}^m |w_j| \leq \eta ,
+% % \end{align*}
+% % is equivalent to minimizing the regularized error function
+% % \begin{align*}
+% % \frac{1}{2} \sum_{i=1}^n (y_i - \mathbf{w}^\top \phi(\mathbf{x}_i) )^2 + \frac{\lambda}{2} \sum_{j=1}^m |w_j|
+% % \end{align*}
+% % }}
+
+% % % Solution goes here
+% % Rewrite the constraint as 
+% % \begin{align*}
+% % \sum_{j = 1}^m |w_j| - \eta \leq 0
+% % \end{align*}
+
+% % We get the Lagrangain function\footnote{When we have an inequality constraint like this, we actually need the Karush-Kuhn-Tucker (KKT) conditions, which are satisfied here. You won't need to know all the math behind these for this course, but you do need to know how to optimize functions under constraints using Lagrange multipliers, and this is a great example.} 
+% % \begin{align*}
+% % \mcL(\mathbf{w}, \lambda) = \frac{1}{2} \sum_{i=1}^n (y_i - \mathbf{w}^\top \phi(\mathbf{x}_i) )^2 + \frac{\lambda}{2} \left(\sum_{j=1}^m |w_j| - \eta\right)
+% % \end{align*}
+
+% % where we introduce the factor of $1/2$ in front of the second term for convenience. We see immediately that the above function is equal to the regularized error function plus $-\frac{1}{2}\lambda \eta$. This term is a constant, so minimizing the Lagrangian with respect to $\mathbf{w}$ will give the same $\mathbf{w}^*$ as minimizing the regularized error function. 
+% \end{enumerate}
+
+\end{document}

@@ -1,0 +1,145 @@
+---
+layout: page
+title: Lecture 1 Recap - Welcome to CS181
+mathjax: true
+weight: 0
+---
+
+<section class="main-container text">
+  <div class="main">
+    <h4>Date: January 25, 2022</h4>
+    <h4>Relevant Textbook Sections: Ch 1</h4>
+    <h4><a href="https://canvas.harvard.edu/courses/100256/external_tools/53531">Lecture Video</a></h4>
+    <h4><a href="{{ site.baseurl }}/files/lecture1_slides.pdf" target="_blank">Slide Deck</a></h4>
+
+    <br>
+    <br>
+
+    <h2>Lecture Recaps</h2>
+    Welcome to CS 181!  The teaching staff will be writing "Lecture Recaps" for each lecture.  The purpose of these lecture recaps is to serve as a resource and reference for you when you wish to review or revisit material as taught in class.  These lecture recaps are <i>not</i> scribes, and their focus will be on mathematical content.
+
+    <h2>Lecture 1 Summary</h2>
+    <ul>
+      <li><a href="#recap1_1">Course Introduction</a></li>
+      <li><a href="#recap1_2">ML Taxonomy</a></li>
+    </ul>
+
+    <h2 id="recap1_1">Course Introduction</h2>
+    This course is about giving you the core fundamentals to how machine learning actually works. Although Friday "Beyond 181" sections will discuss the cutting edge techniques in machine learning, we will mainly see current (and older) mainstream systems.
+
+    <br>
+    <br>
+
+    It is important to keep an eye on the ethics. Machine learning algorithms seem to promise the luxury of offloading important tasks entirely onto a machine. This, unsurprisngly, can be problematic. Amazon, for example, had a hiring tool that showed bias against women. How did this happen? They used their current database of resumes to train their algorithm and that current database had biases! The software learn to replicate this bias.
+    
+    <br>
+    <br>
+
+    Machine learning is not just math. When the math goes out there into the world, we have a huge responsibility to make sure that math is integrated properly and morally. 
+        
+    <br>
+    <br>
+    
+    The issues that follow machine learning are not even just the ethics; Sometimes, the issue is the rigor. Machine learning systems may not be robust or mathematically sound, hence leading you to make the wrong investments or recommending improper drug dosages.
+        
+    <br>
+    <br>
+    
+    In the real world, one might want to predict drug dosage for HIV. This is difficult, because we want to make sure we sequence the drugs so that if the virus figures out a way against a certain set of treatments, it doesn't knock out other options. There is a sequential and difficult nature to this issue, but that does not stop us from trying a simple solution: There are many people who have been on this path of HIV treatment before you. If we have data of patients similar to you, we can prescribe you according to these similar patients or "neighbors". As good engineers, we need to consider the scenario where we have no neighbors near you. In this situation, we can work towards creating a more complex solution, like a reinforced learning model.
+        
+    <br>
+    <br>
+    
+    After we do all this math and beep-boop-machinery, we have to pass information onto a clinician (after all, the robot is not the one treating the patient). The clinician will always know something the robot cannot. Some knowledge cannot be codified. Therefore, we need to realize that our algorithm should be providing actionable information that aids the clinician and does not try to make the decision for them. This is why it is very popular to have machine learning models be able to estimate uncertainty associated with every prediction it gives humans. 
+        
+    <br>
+    <br>
+    
+    Through experience, we realized that if we provide too much information to medical professionals, they will trust the systems too much and disregard their own judgement. This is obviously not ideal, and is an example of machine learning systems very easily be unintentionally misued.
+    
+    We're going to begin the course with a short discussion about Deepfake videos. Before we get too technical, we're going to think through potential societal implications of the ML. This is an example of a video that very convincingly looks like Obama, but was created using ML:
+    
+    <br>
+    <br>
+
+    <iframe width="600" height="400" src="https://www.youtube.com/embed/AmUC4m6w1wo"></iframe>
+    
+    <br>
+    <br>
+
+    Some questions one might consider are:
+    
+    <br>
+    <br>
+
+    <ul>
+      <li>How might you detect a Deepfake video? Were there characteristics of either video that were give-aways that it wasn't real?</li>
+      <li>Under what conditions might you have issues with these Deepfake videos? What are the ethical concerns?</li>
+    </ul>
+
+    Generative adversarial networks are used to create Deepfakes. It's somewhat of a "race" against folks detecting Deepfakes, who find ways to distinguish or identify them, and the Deepfake designers who specifically improve their algorithms to address these use cases.
+    
+    <br>
+    <br>
+
+    There's other forms of impersionation and manipulation too, that are enabled by technology.  But impersonation in itself is not a new phenomenon: photos and media have been faked for years.  What is it that makes Deepfakes so concerning?  There's been a large amount of media about Deepfakes as a political problem.  But one of the most pressing and popular uses of Deepfakes is in revenge porn.  A lot of the social consequences are not necessarily political, but deeply interpersonal, shaping the fabric of our relationships.
+    
+    <br>
+    <br>
+
+    So how do we make machine learning models?  Much of machine learning is about perfecting the "zen", or gaining the wisdom through experience to:
+    
+    <br>
+    <br>
+
+    <ul>
+      <li>Make appropriate modeling choices</li>
+      <li>Have sufficient understanding to be able to apply new techniques</li>
+      <li>Anticipate and identify potential sources of error</li>
+      <li>Evaluate carefully
+    </ul>
+
+    Yet to get there, we also need to do a lot of "push-ups".  By doing math and deriving popular methods, we'll develop a better understanding of ML.
+    
+    <br>
+    <br>
+
+    <h2 id="recap1_2">ML Taxonomy</h2>
+    In CS 181, the methods we study can be split into 3 groups: supervised, unsupervised, and reinforcement learning.
+    
+    <br>
+    <br>
+
+    <h3>Supervised learning</h3>
+    Supervised learning is defined by using labels $y$ during training.  At run-time, an ML model is given a new input $x$, and predicts a label $y$.
+    
+    <br>
+    <br>
+
+    There's two variations of supervised learning:
+
+    <br>
+    <br>
+
+    <ul>
+      <li>Regression, where labels $y$ are continuous and numeric, or real numbers.  Example: Virtu Financial uses regression to predict a stock's future price. </li>
+      <li>Classification, where labels $y$ are discrete and categorical.  Example:  "Swipe typing" uses a language model to predict which word is intended from one's typing.</li>
+    </ul>
+
+    <h3>Unsupervised learning</h3>
+    The crucial difference between unsupervised and supervised learning is that in unsupervised learning, there are no labels $y$ available when training.  All that is available is data $x$.
+    
+    <br>
+    <br>
+
+    Two types of unsupervised learning we'll discuss in-depth are clustering and embedding. Clustering is used to find natural groupings of examples in the data; one popular example is Google News, which delivers groupings of stories about the same topic.  Embedding techniques are used to embed a high-dimensional dataset in a low-dimensional space.  One example of an embedding technique is point-of-sales data from supermarkets.  If we look at time-series data of 1073 products in different locations, and embed the time-series into a lower-dimensional space using a technique called Principal Components Analysis, one of the components actually clearly illustrates the economic effect of the 2008 financial crisis.
+    
+    <br>
+    <br>
+
+    <h3>Reinforcement learning</h3>
+    In Reinforcement Learning, the data is a sequence of triples: states, actions, and rewards.  If a robot is rolling around Cambridge, its state is its current location, the action is which way it moves, and the reward it gets is based on what happens to it after it takes the action (for example, whether it falls into a grate or accomplishes its goal).
+    
+    <br>
+    <br>
+</section>

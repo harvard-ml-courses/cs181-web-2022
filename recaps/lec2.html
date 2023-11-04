@@ -1,0 +1,189 @@
+---
+layout: page
+title: Lecture 2 Recap - Linear Regression
+mathjax: true
+weight: 0
+---
+
+<section class="main-container text">
+    <div class="main">
+      <h4>Date: January 27, 2022</h4>
+      <h4>Relevant Textbook Sections: 2.1, 2.3-2.5, 2.6.1, 2.7.1</h4>
+      <h4>Cube: Supervised, Continuous, Nonprobabilistic</h4>
+
+      <h4><a href="https://canvas.harvard.edu/courses/100256/external_tools/53531">Lecture Video</a></h4>
+      <h4><a href="files/lecture2_slides.pdf" target="_blank">Slides</a></h4>
+      <h4><a href="files/lecture2_ipad.pdf" target="_blank">iPad Notes</a></h4>
+
+
+      <br>
+
+      <h2>Lecture 2 Summary</h2>
+
+      <ul>
+        <li><a href="#recap2_1">What is Regression?</a></li>
+        <li><a href="#recap2_2">Non-Parametric Methods</a></li>
+        <li><a href="#recap2_3">Parametric Methods</a></li>
+      </ul>
+
+      <h2>Relevant Videos</h2>
+      <ul>
+        <li><a href="https://www.youtube.com/watch?v=J8w2iMF5Hak&list=PLrH1CxyJ7Vqb-pHzfUClJNXBDAKajHE74&index=2&t=0s">Linear Regression</a></li>
+        <li><a href="https://www.youtube.com/watch?v=Jy4EWpdw3z4&list=PLrH1CxyJ7Vqb-pHzfUClJNXBDAKajHE74&index=3&t=0s">Regularization</a></li>
+        <li><a href="https://www.youtube.com/watch?v=Y6DA7XFh_io&list=PLrH1CxyJ7Vqb-pHzfUClJNXBDAKajHE74&index=5&t=0s">Gradient descent</a></li>
+      </ul>
+      <br>
+
+      <h2 id="recap2_1">What is Regression?</h2>
+      Regression is the problem of estimating or predicting some value given some other values. For example, it is very important for airlines to be able to accurately predict gate arrival. This is important because there may exist many constraints such as planes can only fly for a certain amount of time before maintenance, or certain crews need to get to certain places at certain times in order to get back to their families, etc. To predict gate arrival times for upcoming and current flights, we have lots and lots of historical data available. Each point in this dataset consists of two parts: an example of a flight and a measurement of the gate arrival (the thing we are hoping to predict).
+      
+      <br><br>
+
+      Another example is sorting movies to recommend. Suppose we are tasked with trying to predict how a particular viewer will rate a particular movie. We have loads of examples of other people's previous movie ratings. Giving this past data, we can train some function (or model) that predicts ratings for movies some person has not seen yet.
+      
+      <br><br>
+
+      <h3>Supervised learning?</h3>
+      We have some input $\mathbf x^*$ and need to predict an output $y^*$. How do we choose or calculate this $y$? And how would we go about measuring the ``goodness'' of our prediction? Note that $y$ can be continuous or discrete.
+      
+      <br><br>
+
+      One way to make the prediction is to explicitly model a relationship, like drawing a line in our data. However, more simply, we can look at similar datapoints in our data and predict based off those datapoints. Seeing what worked in similar cases to $\mathbf x^*$ is a powerful example of non-parametricly predicting the desired label.
+      
+      <br><br>
+
+      <h2 id="recap2_2">Non-Parametric Methods</h2>
+      <h3>K-Nearest Neighbors (KNN)</h3>
+      
+      <br><br>
+
+      One algorithm is $K$-nearest neighbors. First we start with a training dataset of past datapoints which are properly labelled: $$\mathcal D = \{(x_n, y_n)\}_{n=1}^N = \{(x_1, y_1), \ldots, (x_N, y_N) \}.$$ We predict some label $\hat y^*$ for an example $x^*$ by
+      <ol>
+        <li>finding the $K$ closest training examples $\{ x_k : k \in \mathcal{K}^* \}$ to $x^*$,</li>
+        <li>then calculating $\hat y^* = \frac{1}{K} \sum_{k \in \mathcal{K}^*}^K y_k$.</li>
+      </ol>
+      
+      <br><br>
+
+      Implicitly, $\hat y^*$ is a function of the input $\mathbf x^*$ because the training labels averaged to calculate $\hat y^*$ were selected according to their proximity to $\mathbf x^*$.
+      
+      <br><br>
+
+      One pro of KNN is that it works despite the type of curve! We didn't assume the underlying relationship is parabolic or linear or whatever. This is a very appealing property. Another pro is that we don't have many parameters to keep track of, only one $K$ (we will explain why this is so appealing later).
+      
+      <br><br>
+
+      A con is that we may need to keep the training data. To see why this is bad, imagine if we have terabytes of training data; In order for KNN to work, we need to hold onto this training data and query it everytime we need to make a prediction.
+      
+      <br><br>
+
+      The more important issue is that we have not defined ``similar'' or ``close''; Who are those $K$ nearest neighbors? If our training datapoints has high dimensionality (there are many many input features, like a patient's medical record), how will we measure distance between two points.
+      
+      <br><br>
+
+      <h3>Kernelized Regression</h3>
+      Another idea is that we can take a weighted average of all the training labels, but upweigh labels corresponding to examples close to $x^*$. Naturally, close training examples will have lots of influence in predicting $\hat y^*$ and far off points won't have any. We aggregate the training labels like so: $$\hat y^* = \sum_{n = 1}^{N} K(\mathbf x^*, \mathbf x_n) y_n.$$ Here, $K : \mathbb R^D \times \mathbb R^D \to \mathbb R$ is our kernel: it measures the closeness of our new point $\mathbf x^*$ to a training point $\mathbf x_n$.
+      
+      <br><br>
+
+      These kernel weights $\{ K(\mathbf x^*, \mathbf x_n)\}_{n=1}^N$ might not sum to one, so we ensure a convex combination by normalizing: $$\hat y^* = \frac{\sum_{n = 1}^{N} K(\mathbf x^*, \mathbf x_n) y_n}{\sum_n K(\mathbf x^*, \mathbf x_n)}.$$
+      
+      <br><br>
+
+      This has some obvious potential flaws: for example, we can never predict a value outside the min-max range of the training labels.
+      
+      <br><br>
+
+      <h2 id="recap2_3">Parametric Methods</h2>
+      The term parametric refers to how we plan to make predictions based off of some parameters what we will learn. This constrasts what we did in non-parametric regression, where our prediction was explicitly a function of our training data and not of some weights $\mathbf w \in \mathbb R^W$. You can imagine these weights as settings on some larger mathematical system, or model, that we will use to make predictions.
+      
+      <br><br>
+
+      </h3>Linear Regression</h3>
+      Consider our training data $\{ (\mathbf x_n, y_n) \}_{n=1}^N$. Our goal is to learn a function $f(\mathbf x, \mathbf w)$ that predicts our labels (so $\hat y^* = f(\mathbf x^*, \mathbf w)$. How do we identify the best set of parameters $\mathbf w^*$? As a general formula for regression, we
+
+      <br><br>
+
+      <ul>
+        <li>choose a loss function $\mathcal L : \mathbb R^W \to \mathbb R$,</li>
+        <li>choose a class of functions $f : \mathbb R^D \times \mathbb R^W \to \mathbb R$,</li>
+        <li>and identify the best weights as $\mathbf w^* = \operatorname*{argmin}_\mathbf{w} \mathcal L(\mathbf w)$</li>
+      </ul>
+      
+      <br><br>
+
+      In linear regression, we are choose our function class to be all linear functions $$f(\mathbf x, \mathbf w) = w_0 + w_1x_1 + \ldots + w_N, x_N.$$ We can simplify this expression using the ``bias trick''. By adding 1 as the 0-th element to each out our training points (so $\mathbf{x_n} = [0.2, 0.5]^\top$ becomes $[1, 0.2, 0.5]^\top$), we can write $$f(\mathbf x, \mathbf w) = \mathbf w^\top \mathbf x.$$
+      
+      <br><br>
+
+      We can choose our loss function to be the sum of square differences:
+      $$
+      \begin{align*}
+        \mathcal{L}(\mathbf w) &= \frac{1}{2} \left( \sum_{n=1}^N (y_n - \hat y_n)^2 \right) \\
+                      &= \frac{1}{2} \left( \sum_{n=1}^N (y_n - f(\mathbf x_n, \mathbf w))^2 \right) \\
+                      &= \frac{1}{2} \left( \sum_{n=1}^N (y_n -  \mathbf w^\top \mathbf x)^2 \right)
+      \end{align*}
+      $$
+      
+      <br><br>
+
+      The function class and the loss are two different choices we make.
+      
+      <br><br>
+
+      So... how do we find the best weights $\mathbf w^*$? Well, we can minimize the loss function $\mathcal{L}(w)$ by deriving with respect to our weights and solving for a global minimum: $$\nabla_\mathbf{w} \mathcal L(\mathbf w) = \frac{1}{2} \sum_{n=1}^N 2(y_n - \mathbf w^\top \mathbf x_n)(-\mathbf x_n).$$
+      
+      <br><br>
+
+      Generally, we use gradient descent in order to approach a better setting of our weights: 
+      $$\mathbf{w}^{(t+1)} = \mathbf{w}^{(t)} - \eta\nabla_\mathbf{w} \mathcal{L}(\mathbf{w}) = \mathbf{w}^{(t)} - \eta\sum_n ((y_n - \mathbf{w}^T\mathbf{x}_n)(-\mathbf{x}_n))$$
+      
+      <br><br>
+
+      But today, in the case of linear regression, there is an analytic solution (something neat and in closed form). For now, we are hand-wavingly writing this same gradient in matrix notation: $$\nabla_\mathbf{w} \mathcal L(\mathbf w) = -\mathbf X \mathbf y^\top + \mathbf X \mathbf X^\top \mathbf{w}.$$
+      In this version of the derivation, there are D dimensions in the data and N data points. $\mathbf{y}$ is an $N$-dimensional column vector, $\mathbf{w}$ is a $(D+1)$-dimensional column vector of weights and $\mathbf{X}$ is a $N \times (D+1)$ matrix of data such that the $n^{\text{th}}$ row is given by $\mathbf{x}_n^T$. $\mathbf{X}$ is called our design matrix. Note that in order to include our bias, we can set one entire feature (column of the design matrix) to 1, allowing us to derive the appropriate value in W for the bias. First we start with the residuals squared, but in matrix form.
+      $$L(\mathbf{w}) = \frac{1}{2}(\mathbf{y} - \mathbf{X}\mathbf{w})^T(\mathbf{y} - \mathbf{X}\mathbf{w})$$
+
+      Let us take the gradient:
+      $$\frac{\partial \mathcal{L}(\mathbf{w})}{\partial \mathbf{w}} = -2\mathbf{X}^T(\mathbf{y}-\mathbf{X}\mathbf{w})$$
+
+
+      We use the formula $\frac{ \partial (\mathbf{a} -\mathbf{C} \mathbf{b})^T \mathbf{D} (\mathbf{a} - \mathbf{C} \mathbf{b})}{\partial \mathbf{b}} = -2 \mathbf{C}^T \mathbf{D} (\mathbf{a} - \mathbf{C}\mathbf{b})$ (equation 64 in the cookbook) where $\mathbf{D}$ must be symmetric. $\mathbf{D}$ is the identity matrix in our case.
+
+      Note: The derivative can also be taken by first expanding the loss function and computing the derivatives term by term.
+
+      Now we set it to 0 and find $\mathbf{w}^*$:
+          $$\begin{align*}
+              0 &= -2\mathbf{X}^T\mathbf{y} + 2\mathbf{X}^T\mathbf{X}\mathbf{w}^* \\
+              \mathbf{X}^T\mathbf{X}\mathbf{w}^* &= \mathbf{X}^T\mathbf{y} \\
+              \mathbf{w}^* &= (\mathbf{X}^T\mathbf{X})^{-1}\mathbf{X}^T\mathbf{y}
+            \end{align*}
+          $$
+
+      For a given datapoint $\mathbf{x}$, the corresponding prediction is
+          $$\begin{align*}
+            \hat{y} &= \left((\mathbf{X}^T\mathbf{X})^{-1}\mathbf{X}^T\mathbf{y}\right)^T\mathbf{x} \\
+            \hat{y} &= (\mathbf{X}^T\mathbf{y})^T(\mathbf{X}^T\mathbf{X})^{-T}\mathbf{x} \\
+            \hat{y} &= (\mathbf{X}^T\mathbf{y})^T(\mathbf{X}^T\mathbf{X})^{-1}\mathbf{x}
+            \end{align*}
+          $$
+
+      Note: to take the inverse, we need $\mathbf{X}$ to have full column rank, which makes $\mathbf{X}^T\mathbf{X}$ positive definite, and guarantees an inverse. The interpretation is that the features will not be co-linear (the redundant encoding problem). We also find the second order condition (second derivative) $\frac{\partial^2}{\partial \mathbf{w}^2} L(\mathbf{w})$, and ensure that it is positive definite.
+
+      <br>
+      $(\mathbf{X}^T\mathbf{y})^T$ is the correlation between $\mathbf{x}$ and $y$, so if the correlation is high, the weights should be higher since you should weigh $\mathbf{x}$ by more in order to better predict $y$. $(\mathbf{X}^T\mathbf{X})$ is the variation in $\mathbf{x}$.
+
+      <br>
+      <br>
+
+      <u>Linear Algebra View:</u>
+
+      We have $D$ $\mathbf{x}$-vectors living in $N$-dimensions. By taking a linear combination of $D$ vectors, we are trying to produce a length $N$ vector $\hat{\mathbf{y}}$. Our $\hat{\mathbf{y}}$ is essentially the closest projection of $\mathbf{y}$ onto the row space of $\mathbf{X}$.
+
+      <br><br>
+
+      <h3>Basis Regression</h3>
+
+      This may seem too simple: how many patterns in real life perfectly linear? A key extension of this is basis regression. Basically, convert an input $\mathbf x$ to another vector $\phi(\mathbf x)$ where $\phi : \mathbb R^D \to \mathbb R^{D'}$ is a basis function. Then we use $\phi(\mathbf x)$ we perform linear regression in the new input space $\mathbb R^{D'}$. To model a parabolic curve, therefore, we can use the transform $x \mapsto [x, x^2]^\top$.
+      
+</section>

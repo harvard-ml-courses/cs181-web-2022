@@ -1,0 +1,28 @@
+---
+layout: page
+title: Course Staff
+mathjax: true
+weight: 0
+---
+
+<section class="main-container text">
+    <div class="main">
+        <h2 class="title">People</h2>
+        <h3>Instructor</h3>
+        <ul class="lists">
+            <li><a href="mailto:finale@seas.harvard.edu">Finale Doshi-Velez</a></li>
+        </ul>
+
+        <h3>Teaching Fellows</h3>
+        <ul class="lists">
+            {% for ta in site.data.all.tas %}
+            <li>
+                {{ta.name}}
+            </li>
+            {% endfor %}
+        </ul>
+
+        <h2 class="title">Contacting us</h2>
+        <p>When contacting staff, Ed is preferred. Please use email sparingly.</p>
+    </div>
+</section>

@@ -1,0 +1,210 @@
+---
+layout: page
+title: Lecture 15 Recap - Principal Component Analysis
+mathjax: true
+weight: 0
+---
+
+<section class="main-container text">
+    <div class="main">
+
+      <h4>Date: March 24, 2022</h4>
+      <h4>Relevant Textbook Sections: 7</h4>
+      <h4>Cube: Unsupervised, Continuous, Nonprobabilistic</h4>
+
+      <br>
+
+      <h4><a href="https://canvas.harvard.edu/courses/100256/external_tools/38806">Lecture Video</a></h4>
+      
+      <h2 id="recap2_1">Relevant Videos</h2>
+      <ul>
+        <li><a href="https://www.youtube.com/watch?v=T1u8fR9DDpM&list=PLrH1CxyJ7Vqb-pHzfUClJNXBDAKajHE74&index=14&t=0s">Linear Regression</a></li>
+      </ul>
+
+      <h2>Summary</h2>
+
+      <ul>
+        <li><a href="#recap15_1">Embeddings and PCA</a></li>
+        <li><a href="#recap15_2">First Cut: Let's Make This Linear</a></li>
+        <li><a href="#recap15_3">Putting that into the Minimizing Reconstruction Error Framework</a></li>
+        <li><a href="#recap15_4">Let's Make Things More Interpretable</a></li>
+        <li><a href="#recap15_5">Solving to Minimize Reconstruction Error</a></li>
+        <li><a href="#recap15_6">Alternative View: Preserving Variance</a></li>
+        <li><a href="#recap15_7">Final Notes</a></li>
+      </ul>  
+
+      <h2 id="recap15_1">Embeddings and PCA</h2>
+
+      Our past two lectures covered settings with a discrete hidden variable z. In those scenarios, we wanted to cluster our data into different groups, where z told us what group a data point $x$ should go in. Today, we switch to a situation where we have a continuous z, which we call our embedding (because it’s an embedding of all the info in the x's into a z with lower dimension). Instead of grouping things into k discrete clusters, what if we tried to summarize the data into k continuous dimensions? <br><br>
+
+      Recall: Continuous and discrete z are the analogs of continuous and discrete y from the supervised learning topics we covered. Previously, we were given y, but now we do not know what the categories or embeddings z are and need to infer them ourselves.<br><br>
+      
+      One example of a nonprobablistic embeddings algorithm is Principal Component Analysis (PCA), which is the focus of today’s lecture. <br><br>
+      
+      For an initial example, imagine if we had two-dimensional data on people’s heights and leg lengths. The heights and leg lengths are highly correlated. In a 2D plot, the points all lie very close to some line with positive slope. In this case, that line is a low dimensional axis (it’s just one dimension) that explains our data very well. It seems like we may not need two dimensions to represent our data, because we can approximate each piece of data pretty well using just points along this one line.<br><br>
+      
+      The problem we’ll explore today is, how can we identify this hidden axis?<br><br>
+
+      <!-- In the past two lectures, we've looked at models that have a discrete z. In those scenarios, we were hoping to cluster our data into different groups, whether in a probablistic sense (mixture models) or in a nonprobabilistic sense (clustering). Today, we begin to look at a situation where we have a continuous z, which we call our embeddings (because its an embedding of all the info in the x's into a smaller dimensional z). Instead of grouping things into k discrete clusters, what if we tried to summarize the data into k continuous dimensions? One specific example of a nonprobablistic embeddings algorithm is Principal Component Analysis, which is what we'll be looking at for the rest of the lecture. Imagine you're looking at a music file with tons and tons of data. This is perhaps too much data for your machine to process, so you might apply PCA first. What you can do with PCA, is pick k as the number of dimensions you want to reduce your data to. Then, perhaps in the remaining k dimensions you've chosen, you will be able to see trends regarding the types of music you have; perhaps you might find that you have a dimension that represent loudness, another dimension that represents certain types of instruments, etc. Overall, you can use PCA to pick out main properties of the music. Another use case of PCA is you for compression. You might have an image that is of a very large file size. You can apply PCA to reduce it to k dimensions, where the number of dimensions is still big enough to capture the major trends of the image and still look the same upon reconstruction (albeit, perhaps with a bit of resolution loss), but save a lot of storage space. This is something we will look into in the homework. -->
+
+      <h2 id="recap15_2">Getting Started: Let's Make This Linear</h2>
+
+      Say we have $N$ datapoints $x_n$, each with dimension $D$. Suppose we try to find a set of K D-dimensional vectors {$u_k$} such that we can approximate some $x_n$ as a linear combination of them:
+
+      $$x_n \approx z_{n1}u_1 + z_{n2}u_2 + z_{n3}u_3 + ... + z_{nK}u_K = Uz_n$$
+
+      Here, $z_{n1}$, $z_{n2}$, etc are scalar, and $u_1$, $u_2$, etc are vectors. $z_n = (z_{n1}$, $z_{n2},...)$ is a K-dimensional vector that describes the position of x with respect to basis U. If we think of $z_n$ as a vector and $U$ as a matrix whose rows are the $u_k$s, we can rewrite this approximation as the matrix-vector product $Uz_n$.<br><br>
+
+      We are specifically interested in cases where K &#60; D, which means we are compressing the data from D dimensions to K dimensions. Another view is that we are embedding D-dimensional data into K dimensions. By having our reconstruction of x be a linear combination of the z's and the u’s, we are expressing x in terms of our K basis vectors (the u’s).<br><br>
+  
+      <!-- 
+      Suppose we try to find a set of D-dimensional vectors {$u_k$} such that we can describe some x as:
+
+      $$x \approx z_1u_1 + z_2u_2 + z_3u_3 + ... + z_ku_k$$
+
+      Here, $z_1$, $z_2$, etc are scalar, and $u_1$, $u_2$, etc are vectors.
+
+      Note: $z_1 ... z_k$ is a K-dimensional vector that describes the position of x with respect to basis u.
+
+      Essentially we're saying, let's start our first iteration of this process by having reconstruction of x be a linear combination of the z's and the u's. -->
+
+      <h2 id="recap15_3">Minimizing the Reconstruction Error</h2>
+
+      We want our approximation of $x_n$ to be accurate. That is, the loss we are looking to minimize is a measure of the difference between $x_n$ and its approximation $Uz_n$:
+
+      <!-- Let's tie this back into the formal framework we introduced in the K-means lecture with regards to reconstruction error. Essentially, we have the following: -->
+
+      $$L(\{z_n\}_{n=1}^N, U) = \frac{1}{N} \sum^N_n ||x_n - U z_n||^2_2$$
+
+      Where our $x_n$ is a D by 1 data point, our U is a D by K matrix (its rows are the basis vectors $u_k$) and our $z_n$ is a K by 1 vector (embedding). Like before, we are trying to minimize the reconstruction error.<br><br>
+
+      <h4>Adding Some Constraints</h4>
+
+      The solution in the above minimization is not unique. Specifically, $Uz$ can be broken down into $UQQ^{-1}z$ where $Q$ is any $K$ by $K$ invertible matrix. Then we could set a new $U$ to be $UQ$ and a new $z$ to be $Q^{-1}z$ and attain the same loss as before. <br><br>
+
+      Adding constraints on U can help to reduce the symmetries in the loss in addition to providing U's with nice properties. Depending on the application, we might want U to be sparse, or for U to be non-negative. Different projects will use different constraints on U depending on what properties they are looking for. Today, we will just add the constraint that U is orthonormal. <br><br>
+
+      <!-- One thing we quickly notice is that the solution in the above minimization is not unique. Specifically, $Uz$ can be broken down into $UQQ^{-1}z$ where $Q$ is a $K$ by $K$ invertible matrix. Then this means we could set our new $U$ to be $UQ$ and our new $z$ to be $Q^{-1}z$ and everything would still work. You can imagine this as essentially a scaling vector. To deal with this, we will add the constraint that U is orthonormal.<br><br> -->
+
+      We will have:<br><br>
+
+      $\langle u_k, u_k \rangle = 1$ (constrains any scaling)<br>
+      $\langle u_k, u_{k'} \rangle = 0$ when $k \neq k'$ (makes the basis vectors orthogonal)<br><br>
+
+      We get some nice linear algebra properties from setting the above constraints. Specifically, we can easily recover z given x. We have:<br><br>
+
+      $$x_n \approx z_{n1}u_1 + z_{n2}u_2 + z_{n3}u_3 + ... + z_{nK}u_K$$
+
+      We can multiply by $U_k^T$ on both sides:
+
+      $$x_nU_k^T = z_{n1}U_1U_k^T + z_{n2}U_2U_k^T + ... + z_{nk}U_kU_k^T$$
+
+      Using the rules we learned from before, we know that when the k's are not equal, the terms $U_1U_k^T$, $U_2U_k^T$, etc become 0. Leaving us with:
+
+      $$x_nU_k^T = z_{nk}U_kU_k^T$$
+
+      $U_kU_k^T$ evaluates to 1, so by considering what would happen if we multiplied by the entire $U^T$ instead of just $U_k^T$, we conclude that:
+
+      $$x_nU_k^T = z_{nk}$$
+
+      $$\implies x_nU^T = z_n$$
+
+      <h2 id="recap15_4">Let's Make Things More Interpretable</h2>
+
+      Let's improve upon our first attempt at the problem. Specifically, instead of reconstructing the whole thing, let's try to reconstruct the difference of the data from the mean. Below, we break down the data in this way, where x is approximated as a perturbation from the mean datapoint $\bar{x}$:
+
+      $$x_n \approx \bar{x} + z_{n1}U_1 + z_{n2}U_2 + ... + z_{nk}U_k$$
+
+      Now, the bases are helping us capture variation from the mean instead of being used to approximate all of $x$ like before. Our new optimization is as follows:
+
+      $$L({z, u}) = \frac{1}{N} \sum_n ||(x_n - \bar{x}) - Uz_n||^2_2$$
+
+      Where $(x_n - \bar{x})$ is the new variable we are trying to reconstruct. We also keep our constraint that U is orthonormal. From linear algebra, we know that if K = D, {U_1 ... U_d}, we would have perfect reconstruction and incur no loss, because we are keeping x in the same dimension as before. Now we will use that fact to imagine we have extra $U_{k + 1}, … U_d$ to use and rewrite x as the following:
+
+      $$x_n = z_{n1}U_1 + ... + z_{nk}U_k + ... z_{nD}U_D + \bar{x}$$
+
+      Then, we can take our loss and substitute in the expression for $\bar{x}$ above.
+
+      $$L({z, u}) = \frac{1}{N} \sum_n ||\sum^D_{d=1} z_{nd} U_d - \sum^K_{d=1} z_{nd} U_d||^2_2$$
+
+      This can be simplified into (because the summation is of the same terms so we can just edit the indices on the summation and combine the two terms):
+
+      $$L({z, u}) = \frac{1}{N} \sum_n ||\sum^D_{d=K+1} z_{nd} U_d||^2_2$$
+
+      This can be split into:
+
+      $$L({z, u}) = \frac{1}{N} \sum_n \left(\sum^D_{d=K+1} z_{nd} U_d \right ) \left (\sum^D_{d=K+1} z_{nd} U^T_d \right )$$
+
+      And invoking orthonormality (as in $U_d^TU_{d'} = 0$ since $d \neq d'$) we can simplify into:
+
+      $$L({z, u}) = \frac{1}{N} \sum_n \sum^D_{d=K+1} z^2_{nd}$$
+
+      Now we substitute in $z_{nd} = U^T_d (x_n - \bar{x})$<br><br>
+
+      $$L({z, u}) = \frac{1}{N} \sum_n \sum^D_{d=K+1} U^T_d (x_n - \bar{x})(x_n - \bar{x})^TU_d$$
+
+      We can rearrange:
+
+      $$L({z, u}) =  \sum^D_{d=K+1} U^T_d \frac{1}{N} \sum_n (x_n - \bar{x})(x_n - \bar{x})^TU_d$$
+
+      The middle term, $\frac{1}{N} \sum_n (x_n - \bar{x})(x_n - \bar{x})^T$, is the empirical covariance of x, $\Sigma$, which is pretty cool! Our solution is something related to the covariance of the data we’ve seen.
+      
+      <!-- We see that the middle term, $\frac{1}{N} \sum_n (x_n - \bar{x})(x_n - \bar{x})^T$, is the empirical covariance, $\Sigma$, which is quite interesting! -->
+
+      <h2 id="recap15_5">Solving to Minimize Reconstruction Error</h2>
+
+      How do we solve the above equation? Suppose we had k=1. Then there's only one U to solve for.
+
+      $$\textrm{min}_U U^T\Sigma U \textrm{ such that } U^TU = 1$$
+
+      Next, we use the Lagrangian below:
+
+      $$\textrm{min}_U U^T\Sigma U + \lambda (1 - U^TU)$$
+
+      $$\frac{\partial \textrm{ obj}}{\partial U} \textrm{ leads to } \Sigma u = \lambda u$$
+
+      So it turns out that the solution will be an eigenvector of the sample covariance!
+
+      We can now go back to the main problem given this information.<br><br>
+
+      $$\textrm{min}_U \sum^D_{d=K+1} U^T_d \Sigma U_d = \sum^D_{d=K+1} U^T_d \lambda_d U_d = \sum^D_{d=K+1} \lambda_d$$
+
+      Remember that our ultimate goal was to minimize the reconstruction error. It turns out that we will be able to do this if we “leave out” the directions (eigenvectors of $\Sigma$) with the smallest eigenvalues. This is like making sure the error is small. In an alternative view, we are able to minimize the error when we KEEP the eigenvectors with the top K eigenvalues of $\Sigma$. Luckily, this computation is very easy using SVD (eigendecomposition)! Since $\Sigma$ is symmetric, it is guaranteed to have D real eigenvalues by spectral theorem.<br><br>
+      
+      <!-- We only formally showed that this argument works when k = 1, but the claim we make extends to cases with general k if we consider iteratively "peeling off" the next <br><br> -->
+      
+      <!-- Remember that our ultiamte goal was to minimize the reconstruction error. It turns out, that we will be able to do this if we leave out the directions with the smallest eigenvalues. Or alternatively, we are able to minimize the error when we KEEP the top K eigenvectors of $\Sigma$. Luckily, the computation on this is actually very easy, we can do this using SVD (eigendecomposition)! -->
+
+      Note: the principle components are the top eigenvectors, which get preserved for use in reconstruction. This is what the name PCA refers to.
+      
+      <h2 id="recap15_6">Alternative View: Preserving Variance</h2>
+
+      We can also take a variance view of the exact same problem. Whereas before, we were thinking in the sense of minimizing reconstruction error, where we wanted to limit distance to our newly chosen basis, we can alternatively think about it as variance preservation. This means we want the vectors that capture the most variance in the data x; we want the vectors that maximize the variance captured. If our bases pointed in directions where the data didn’t vary, then scaling along them would not be very useful for better approximating the data. <br><br>
+      
+      <!-- We can also take a variance view of the exact same problem. Whereas before, we were thinking in the sense of minimizing reconstruction error, where we wanted to limit distance to our newly chosen basis, we can alternatively think about it as variance preservation: as in, we want the vectors that capture the most variance in the data x; we want the vectors that maximize the variance captured.<br><br> -->
+
+      Suppose we wanted a single vector u that captured most of the variance in x.<br><br>
+
+      $$z = U^Tx$$
+
+      Where z is a scalar.
+
+      $$var(z) = U^Tvar(x)U = U^T \Sigma U$$
+
+      Constraint: $U^TU = 1$<br><br>
+
+      We want to maximize var(z):
+
+      $$\max_U U^T \Sigma U \textrm{ such that } U^TU = 1$$
+
+      Apply the Lagrangian and we'll see that $\Sigma u = \lambda u$, where we pick the biggest $\lambda$. See Section 7.3.4, "Identifying Directions of Maximal Variance in our Data", in the textbook for a more thorough walkthrough of this derivation. 
+
+      <h2 id="recap15_7">Final Notes</h2>
+
+      The subspace found by PCA is unique, but other equally good orthonormal solutions exist, too. They just aren’t found by PCA. <br><br>
+
+      Practical advice: when doing PCA, remember to subtract the mean! Forgetting to subtract the mean will affect your results. 
+
+      <!-- Practical advice: when doing principal component analysis, always remember to subtract the mean! Forgetting to subtract the mean will affect your results. Another note is that kernalization can always done first, beforehand. Finally, to see how this relates to other models, it turns out that if we have z generate x, with z normally distributed and with $x = Uz + \epsilon$, this gives us probabilistic PCA, factor analysis, independent component analysis, and also autoenconders and varational autoenconders! -->
+    </div>
+</section>

@@ -1,0 +1,184 @@
+---
+layout: page
+title: Concept Check Solutions
+mathjax: true
+weight: 0
+---
+
+<section class="main-container text">
+    <div class="main">
+      <ul>
+        <!-- <li>
+          Lecture 2 - Linear Regression (January 28, 2021)
+          <ul>
+            <li>Question A: Graph 1 is Line 2, Graph 2 is Line 1, Graph 3 is Line 2
+            <li>Question B: Graph 1: one or more large residuals, Graph 2: an extreme x value, Graph 3: a pattern in the residuals</li>
+            <li>Question C: Colinearity between height and leg length</li>
+          </ul>
+        </li>
+
+        <li>
+          Lecture 4 - Linear Classification (February 4, 2021)
+          <ul>
+            <li>Q1: Hinge and Logistic</li>
+            <li>Q2: 0-1</li>
+            <li>Q3: Logistic (Hinge is not technically correct, although it is  differentiable almost everywhere)</li>
+            <li>Q4: Hinge and Logistic</li>
+            <li>Q5: Logistic</li>
+          </ul>
+        </li>
+
+        <li>
+          Lecture 5 - Probabilistic Classification (February 9, 2021)
+          <ul>
+            <li>QA: 0/1 Lines 2 and 3, Hinge Lines 2 and 3, Logistic line 3</li>
+            <li>QB: Line 2</li>
+            <li>QC: Yes, the unlabeled data seems to help us here, although might not always help</li>
+          </ul>
+        </li>
+
+        <li>
+          Lecture 6 - Model Specification (February 11, 2021)
+          <ul>
+            <li>A: The difference in training and testing may be coming from variance. Adding more data will help for model A. Model B has already been fit, so adding more data may not help (although it may not be the best fit, depending if another model can reach test/validation accuracy of >0.7). </li>
+            <li>B: Regularization or ensembles might help because of the high variance in model A. For model B, regularization and early stopping may not be as useful. </li>
+            <li>C: If there is high variance in model A, given a new dataset we can expect a different model fit. For model B, we expect similar classifications because it has tended to underfit the data, meaning that most predictions on new datasets will have high bias and low variance. </li>
+          </ul>
+        </li>
+
+        <li>
+          Lecture 7 - Bayesian Model Specification (February 16, 2021)
+          <ul>
+            <li>A: Yes</li>
+            <li>B: $a_0 = 0$ and $a_2 = 1 - a_1$</li>
+            <li>C: 0 to 0.5 uniformly</li>
+            <li>D: .5 with probability 1</li>
+          </ul>
+        </li>
+
+        <li>
+          Lecture 8 - Neural Networks I (February 18, 2021)
+          <ul>
+            <li>A: Yes</li>
+            <li>B: No </li>
+            <li>C: Yes</li>
+          </ul>
+        </li>
+
+        <li>
+          Lecture 9 - Neural Networks II (February 22, 2021)
+          <ul>
+            <li>A: No, the bias can’t get increase. If model A could fit the data well and model B was bigger, then model B can fit the data just as well. </li>
+            <li>B: num. params &#60;&#60; num. data: No; num. params approx. equal num. data: Yes, one perfect model; num. params &#62;&#62; num. data: Yes, many perfect models </li>
+            <li>C: SGD implicitly performs regularization. If there’s a lot of perfect models, we’ll pick one that we don’t have to move far to get to. Then the model selected will have small parameters if we start the SGD with small weights.</li>
+          </ul>
+        </li>
+
+        <li>
+          Lecture 10 - Max Margin (February 26, 2021)
+          <ul>
+            <li>Q1: Removing any of the three points will change the max margin boundary </li>
+            <li>Q2: For very large C, the optimal decision boundary will try to separate the data if possible. As C increases, the formulation is more able to "bend" with the data  </li>
+            <li>Q3: Lower regularization ("may overfit"!)  </li>
+          </ul>
+        </li>
+
+        <li>
+          Lecture 11 - SVM II (March 2, 2021)
+          <ul>
+            <li>Q1: A subset of points on the margin boundary (“A subset of points on the margin boundary or inside the margin region” is technically also correct, but note that there aren’t points inside the margin region for hard-margin formulations) </li>
+            <li>Q2: “Decision boundary may change, and for small lambda will tend to overfit” (since for small lambda, pays more attention to examples close by, and so different examples for different points) ; OR “Decision boundary may change, and for large lambda will tend to underfit the data”. Both are correct.</li>
+            <li>Q3: Many support vectors may suggest this (paying more attention to the data), and cross-validation</li>
+            <li>Q4: Allows to work implicitly in a high dimensional feature space </li>
+          </ul>
+        </li>
+
+        <li>
+          Lecture 13 - Clustering (March 9, 2021)
+          <ul>
+            <li>Q1: A. First cluster the center, then merge the points around the outside into clusters, potentially in an unbalanced way. Then when all outside points are merged, combine with center. </li>
+            <li>Q2: B. First cluster the center, then merge the points around the outside into some number of clusters of a balanced size, then merge some of these clusters with the center, then cluster all points </li>
+            <li>	Q3: B. d(x0,x0) &#60; d(x0,x1), with probability approaching ½ (this is the “curse of dimensionality” and comes about because random points in a large unit hypercube will tend to have the same distance via the central limit theorem)  </li>
+            <li>Q4: No, since the pairwise distances are noisy </li>
+            <li>Q5: Yes (it is stable, i.e., would have converged, with these prototypes)</li>
+          </ul>
+        </li>
+
+        <li>
+          Lecture 14 - Mixture Models (March 18, 2021)
+          <ul>
+            <li> Q1: D. None of the soft assignments of examples will ever change, AND the parameters will only change in the first step </li>
+            <li> Q2: D. None of the soft assignments of examples will ever change, AND the parameters will only change in the first step</li>
+            <li> Q3: No, will not differ much from a model just trained with images </li>
+          </ul>
+        </li>  
+
+        <li>
+          Lecture 15 - PCA (March 23, 2021)
+          <ul>
+            <li> Q1: (In order of most to least variance explained) x1, x2, x3</li>
+            <li> Q2: No</li>
+            <li> Q3: Answer depends on interpretation of question: The new vectors will capture the same subspace, which contains all the variance (Yes). But QV’s vectors no longer capture the exact two directions with the best variance within that subspace (No). </li>
+          </ul>
+        </li>  
+          
+        <li>
+          Lecture 16 - Topic Models (March 23, 2021)
+          <ul>
+            <li> Q A1: [1/3, 1/3, 1/3], [1/3, 1/3, 1/3], [1/3, 1/3, 1/3] </li>
+            <li> Q A2: [0, 1, 0], [1, 0, 0], [0, 0, 1] </li>
+            <li> Q B1: [13, 11, 10] </li>
+            <li> Q B1: [3.01, 1.01, 0.01] </li>
+            <li> Q C: No longer sparse, because even if we think a document is about one topic, the posterior may not be entirely sparse still (outside scope) </li>
+          </ul>
+        </li>  
+
+        <li>
+          Lecture 17 - Graphical Models (March 30, 2021)
+          <ul>
+            <li> A1: 12 + 12 + 48 + 12 = 84 </li>
+            <li> A2: 1 + 1 + 2 + 1 = 5 </li>
+            <li> A3: 16 + 16 + 32 + 16 = 80 </li>
+            <li> B: Only includes linear functions. Continuous case has fewer parameters because this case is linear. Linearity is a huge assumption that greatly reduces the parameters. </li>
+         </ul>
+        </li>  
+
+        <li>
+          Lecture 18 - Inference in Bayes Nets (April 1, 2021)
+          <ul>
+            <li> A: Cut link from z to t </li>
+            <li> B: $\sum_{z} p(y=1 | t=1, z=z) p(z=z)$ </li>
+         </ul>
+        </li>  
+
+        <li>
+          Lecture 19 - Hidden Markov Models (April 6, 2021)
+          <ul>
+            <li> B: $[0, 1,0]$. We know for sure that we are in state B because the initial state must be A.</li>
+            <li> B: $[0, \frac12, \frac12]$. Now that there's been another transition, we aren't sure if we're in B or C, but we know we can't be in A.</li>
+         </ul>
+        </li>
+        
+        <li>
+          Lecture 20 - Markov Decision Processes (April 8, 2021)
+          <ul>
+            <li> No </li>
+            <li> No</li>
+            <li> Yes </li>
+            <li> No </li>
+         </ul>
+         Can you understand why? For a more detailed explanation (and more hints), refer to the full explanations here: <a href="files/lecture20_concept.pdf" target="_blank">Concept Check Detailed Notes</a> 
+        </li>
+
+        <li>
+          Lecture 20 - Markov Decision Processes (April 13, 2021)
+          <ul>
+            <li>1: Around top to avoid falling into red zone</li>
+            <li>2: Straight right now that there is no noise</li>
+            <li>3: Around top. Because we're using epsilon-greedy exploration and the SARSA agent must follow its policy, it will sometimes fall off into the red zone when it goes to the right and learn that going to the right is bad. This is like the agent can’t tell the difference between having noise and having to follow epsilon-greedy exploration.</li>
+            <li>4: Straight right. Even if the agent sometimes falls into the red zone while going right, it will still learn the optimal policy.</li>
+         </ul>
+        </li> -->
+      </ul>
+    </div>
+</section>

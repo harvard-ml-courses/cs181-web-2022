@@ -1,0 +1,211 @@
+---
+layout: page
+title: Lecture 13 Recap - Clustering
+mathjax: true
+weight: 0
+---
+
+<section class="main-container text">
+    <div class="main">
+
+
+      <h4>Date: March 10, 2022</h4>
+      <h4>Relevant Textbook Sections: 6</h4>
+      <h4>Cube: Unsupervised, Discrete, Nonprobabilistic</h4>
+
+      <br>
+
+      <h4><a href="https://canvas.harvard.edu/courses/100256/external_tools/38806">Lecture Video</a></h4>
+
+
+      <h2>Announcements</h2>
+      <ol>
+        <li>HW3 is due this Friday.</li>
+        <li>HW4 is released tomorrow, but it designed to take a week.</li>
+        <li>Enjoy the break!</li>
+      </ol>
+
+      <h2 id="recap2_1">Relevant Videos</h2>
+      <ul>
+        <li><a href="https://www.youtube.com/watch?v=N8jVmBbccYs&list=PLrH1CxyJ7Vqb-pHzfUClJNXBDAKajHE74&index=12&t=0s">K Means</a></li>
+        <li><a href="https://www.youtube.com/watch?v=1y3PaEAmNYc&list=PLrH1CxyJ7Vqb-pHzfUClJNXBDAKajHE74&index=13&t=0s">HAC</a></li>
+      </ul>
+
+
+      <h2>Summary</h2>
+
+      <ul>
+        <li><a href="#recap13_1">Intro to Unsupervised Learning</a></li>
+        <li><a href="#recap13_2">Nonprobabilistic Clustering: K-Means</a></li>
+        <li><a href="#recap13_3">Nonprobabilistic Clustering: Hierarchical Agglomerative Clustering</a></li>
+      </ul>
+
+      <h2 id="recap13_1">Intro to Unsupervised Learning</h2><br>
+
+      So far in the class, we've been doing supervised learning, where we try to predict y's (labels) given x's (data). Now, we'll look at unsupervised learning, where there are no more y's, and only x's.  Instead of labeling the data, the task is now to "summarize" the data.  At the most general level, unsupervised learning is a "summarization task" that we're trying to complete. This is helpful for:
+     
+      <ol>
+        <li>Figuring out what classes or labels to later use with this data in a supervised learning model</li>
+        <li>Compressing high-dimensional data, like images, to lower dimensions in order to save storage space</li>
+        <li>Organizing data, like grouping news articles covering the same topic or songs with the same style together</li>
+      </ol>
+
+      Today we’ll cover clustering, a method for putting data into groups. 
+
+      <h2 id="recap13_2">Nonprobabilistic Clustering: K-Means</h2><br>
+
+      <h4>Scenario and Notation</h4>
+
+      First, we define our K-means clustering problem.
+
+      <ul>
+        <li>We have our data $x_1, x_2, ..., x_n$</li>
+        <li>We may be given a number $K$ of desired clusters to find</li>
+        <li>We want an algorithm that outputs group assignments $z_{nk}$, where $z_{nk}$ tells us if $x_n$ is in cluster $k$. That is,
+          $$	z_{nk} =  \begin{cases} 
+          0 & x_n \text{ is not in cluster } k \\
+          1 & x_n \text{ is in cluster } k
+          \end{cases} $$ </li>
+      </ul>
+
+      Intuitively, we want to split the data into K clusters so that examples are similar to other members of their same cluster, but not similar to the members of other clusters. To accomplish this, we’ll need some way to measure how different two datapoints are. We have a number of options; we could use Euclidean distance, edit distance for text data, or Hamming distance. For today, we will just use Euclidean distance: 
+      
+      $$d(x, x') = ||x - x'||_2.$$
+
+      For K-means clustering, the point $\mu_k$ will be a "prototype" of the cluster $k$. The idea is that $\mu_k$ defines cluster $k$ by representing its center point. Note: $\mu_k$ should have the same dimensions as each datapoint $x_i$.
+
+      <h4>The Objective</h4>
+
+      We use the following objective for the K-means problem. The idea is that we want to find the $\mu$’s (cluster centers) and $z$’s (cluster assignments) so that data points $x_n$ are close to the centers of the clusters they got assigned to.
+
+      $$\min_{z, u} \sum_n \sum_k z_{nk} ||x_n - \mu_k||_2^2 $$
+
+      Recall that $z_{nk}$ is either 0 or 1 depending on if $x_n$ is in cluster $k$. In the sum, we multiply the distances by $z_{nk}$ so that only distances from $\mu_k$ to points in cluster $k$ count in our loss.  This is just like how we've used indicator variables in the past. <br><br>
+
+      It turns out this optimization is NP hard and non convex, so it's difficult to solve. Luckily, Lloyd’s algorithm helps us find a pretty good local optimum. <br><br>
+
+      <h4>Lloyd's Algorithm</h4>
+      We can find clustering assignments for K-means by following this algorithm:
+          <ol>
+            <li>Randomly initialize prototypes $\mu_k$</li>
+            <li>Repeat until converged:</li>
+            <ol>
+              <li>Assign each example to its closest prototype 
+
+                $$x_n = \textrm{argmin}_k ||x_n - \mu_k ||_2$$</li>
+
+              <li>For each cluster $k$, set $\mu_k$ to the centroid (mean) of the examples assigned to this cluster 
+
+                $$\mu_k = \textrm{mean}(x_n\textrm{ such that }z_{nk} = 1) = \frac{1}{N_k} \sum z_{nk} x_n,$$
+
+                where $N_k$, the number of items in the cluster, is obtained by $\sum_n z_{nk}$</li>
+            </ol>
+
+          </ol>
+
+          The results of this algorithm depend on how the prototypes are initialized. Usually, we restart it several times and pick the best solution found. <br><br>
+
+          This idea of alternating optimization (aka coordinate descent) is going to be key in our unsupervised learning, because now we have two sets of unknowns to find, the global $\mu$’s and the data-specific z's).
+
+
+       <h4>Why Lloyd's Algorithm Works</h4>
+
+       At a high level, this algorithm works because in each step (the calculating z step, and the calculating $\mu$ step), we are reducing the loss. Since we are doing this until convergence, we will reach some local minimum.<br><br>
+       
+       <u>For calculating z:</u><br><br>
+
+       When we calculate the $z$’s, we are assigning each point to the cluster with the closest prototype. Of course this is the choice that would minimize loss for the current locations of prototypes, as we are shortening (or not changing) the distance between points and their prototypes.<br><br>
+
+       <u>For calculating $\mu$:</u><br><br>
+
+       We can go back to the objective function and set its derivative with respect to $\mu_k$ to 0 to show that the step we take in Lloyd's algorithm minimizes the loss.
+
+       $$L = \min_{z, u} \sum_n \sum_k z_{nk} ||x_n - \mu_k||_2^2 = \sum_n z_{nk} (x_n - \mu_k)^T(x_n - \mu_k)$$
+       
+       We can take this derivative with respect to $\mu_k$.
+
+       $$\frac{\partial L}{\partial \mu_k} = - 2 \sum z_{nk} (x_n - \mu_k) = 0$$
+
+       $$\left ( \sum_n z_{nk} \right )\mu_k = \sum_n z_{nk} x_n$$
+
+       We pulled out the $\mu$ since it doesn't depend on n.
+
+       $$\mu_k = \frac{\sum_n z_{nk} x_n}{\sum_n z_{nk}} = \frac{\sum_n z_{nk} x_n}{N_k}$$
+
+       This is exactly what we set $\mu_k$ to when running our algorithm, illustrating how the algorithm finds a local minimum for $\mu$.<br><br>
+
+       <h4>Selecting K</h4>
+
+        How many clusters should we pick? We plot the lowest loss achieved for different values of K and look for the value of K corresponding to a bend in the loss curve. This is also known as the elbow method. The idea is that as we increase K, the loss will keep decreasing. In fact, if we set K to be as big as n, the number of data points we have, each point can be its own cluster and the loss will be 0. So it doesn’t make sense for us to minimize the loss. Instead, we look to see where the plot of loss vs. clusters makes an elbow shape - this is when the improvement in loss levels off as we add more clusters, and the returns on adding more clusters are diminishing. 
+       
+       <h4>More Comments About K-Means</h4>
+
+       <ul>
+
+         <li>K-means is a parametric method, where the parameters are the prototypes.</li>
+
+         <li> Inflexible; the decision boundary is linear.</li>
+
+         <li>Fast! The update steps can be parallelized.</li>
+
+         <li>There are several variations on the basic K-means algorithm</li>
+
+         <ol>
+          <li>K-means++ gives a more specific way to initialize clusters</li>
+          <li>K-medoids chooses the centermost datapoint in the cluster as the prototype instead of the centroid. (The centroid may not correspond to a datapoint.)</li>
+        </ol>
+
+      </ul>
+
+
+
+      <h2 id="recap13_3">Nonprobabilistic Clustering: Hierarchical Agglomerative Clustering</h2>
+      <h4>The Algorithm</h4>
+
+      The Hierarchical Agglomerative Clustering (HAC) algorithm is as follows: 
+      
+      <ol>
+        <li>Every example starts in its own cluster.</li>
+        <li>While there is more than 1 cluster, we merge the two “closest” clusters.</li>
+        </li>
+      </ol>
+      
+      This forms a hierarchy of clusters, which can be visualized as a dendrogram (a tree) over the data where nodes are clusters, and a node $x$’s children represent the clusters that were at one point merged into node $x$.<br><br>
+
+      <div class="text-center">
+        <img src="{{ site.baseurl }}/images/recap13_1.png" style="width:60%"  alt="Dendrogram Example"></img>
+      </div>
+    
+      Some features of HAC include: 
+      
+      <ul>
+        <li>HAC is nonparametric</li>
+        <li>It is also deterministic because there is no random intialization involved</li>
+        <li>We do not need to specify a number of clusters to find</li>
+        <li>Complexity scales as $O(Tn^2)$, where T is the number of iterations (merges) used, because the algorithm is based off of pairwise distance comparisons. If we merge until all clusters are combined, T will be $O(N)$. </li>
+      </ul>
+      
+      <h4>Distance Between Points and Distance Between Clusters</h4>
+
+      For HAC, we need two measures of distance:
+      <ul>
+        <li>$d(x, x’)$ will measure the distance between individual points</li>
+        <li>A linkage function will measure the distance between two clusters of points. This is how we determine what the "closest" pair of clusters are. Some options for the linkage function are</li>
+        <ul>
+          <li>Minimum distance between two elements of the clusters (where "distance" here is measured by our distance function $d$)</li>
+          <li>Maximum distance between two elements of the clusters</li>
+          <li>Average distance between elements in the different clusters</li>
+          <li>Distance between the centroids of the clusters
+          </li>
+        </ul>
+      </ul>
+
+      The min linkage is more likely to merge large clusters together, as there will be a greater chance of some element of cluster A being close to some element of cluster B when A and B are large. The min linkage will also tend to merge clusters into “chains” or “strings”.  The max linkage will prefer compact clusters instead. The average and centroid linkages are compromises between the min and max ones. You will need to pick a linkage depending on what you want your output to look like. <br><br>
+
+      <div class="text-center">
+        <img src="{{ site.baseurl }}/images/recap13_2.png" style="width:60%"  alt="Comparison of different linkage functions"></img>
+      </div>
+
+      
+    </div>
+</section>

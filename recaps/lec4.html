@@ -1,0 +1,154 @@
+---
+layout: page
+title: Lecture 4 Recap - Linear Classification
+mathjax: true
+weight: 0
+---
+
+<section class="main-container text">
+  <div class="main">
+    <h4>Date: February 3, 2022</h4>
+    <h4>Relevant Textbook Sections: 3.1 - 3.5</h4>
+    <h4>Cube: Supervised, Discrete, Nonprobabilistic</h4>
+
+    <br>
+
+    <h4><a href="https://canvas.harvard.edu/courses/100256/external_tools/38806">Lecture Video</a></h4>
+
+
+    <h2>Announcements</h2>
+    <ul>
+      <li>Again, HW is extended and is due Feb 11</li>
+      <li>Midterm 1 has been moved to Mar 1</li>
+    </ul>
+
+    <h2>Lecture 4 Summary</h3>
+
+     <ul>
+        <li><a href="#1">Classification vs Regression</a></li>
+        <li><a href="#2">Non-Parametric Classification</a></li>
+        <li><a href="#3">Linear Classification</a></li>
+        <li><a href="#4">Metrics</a></li>
+      </ul>
+
+      <h2 >Relevant Videos</h2>
+      <ul>
+        <li><a href="https://www.youtube.com/watch?v=Y6DA7XFh_io&list=PLrH1CxyJ7Vqb-pHzfUClJNXBDAKajHE74&index=5&t=0s">Gradient descent</a></li>
+        <li><a href="https://www.youtube.com/watch?v=iUzy4GEmSN4&list=PLrH1CxyJ7Vqb-pHzfUClJNXBDAKajHE74&index=6&t=0s">Binary Linear Classification</a></li>
+      </ul>
+
+      <br>
+
+      <h2 id="1">Classification vs Regression</h2>
+      We are still in the setting where given features $x \in \mathbb R^D$, we hope to predict some label $y \in \mathcal Y$ where $\mathcal Y$ is our output space. Until now, we have been predicting continuous scalar labels $y \in \mathbb R$ by using non-probablistic and probalistic regression. In classification, however, we instead predict discrete labels $y \in \{ C_k \}_{k=1}^K$ where $C_1, \ldots, C_K$ are our discrete possible classes.
+      <br><br>
+
+      For example, based on an image, we can classify what species a bug is. In this example, our class labels may look like $$\mathcal Y = \{\text{Fly}, \text{Ant}, \text{Bee}\}.$$
+      <br><br>
+      
+      Obviously, we need a way to encode these discrete classes mathematically, and there are multiple ways to do this You may see
+      $$\mathcal Y = \{C_1, \ldots, C_k\}$$
+      as a general form. If there are only two classes, then you may see either
+      $$\mathcal Y = \{-1, +1\} \quad \text{or} \quad \mathcal Y = \{0, 1\}.$$
+      An example $x_n$ is "positive" if it belongs in the positive class $y_n = +1$ or "negative" if $y_n = -1$. In many settings, we use "one-hot encoding" which maps each class label $C_k$ to a vector $y \in \mathbb R^K$ of 0 everywhere except a 1 in the $k$-th element:
+      $$\mathcal Y = \left\{ \begin{bmatrix}1\\0\\\vdots\\0\end{bmatrix},\, \begin{bmatrix}0\\1\\\vdots\\0\end{bmatrix},\, \ldots,\, \begin{bmatrix}0\\0\\\vdots\\1\end{bmatrix} \right\}$$
+      <br><br>
+      
+      We have these different representations because each is convinient for a different setting. Conceptually, all of these are the same! They all say that labels $y$ are discrete.
+      <br><br>
+      
+      <h2 id="2">Non-Parametric Classification</h2>
+      We still have to ask "what is our model?" and "what is our objective?". This second question asks what it means for one model to be better than another at the task of classificaiton. 
+      <br><br>
+
+      Why don't we reuse regression? Well, KNN still works actually. We can find our $K$-nearest neighbors and instead of averaging their labels, we take the majority.
+      <br><br>
+      
+      The advantage of using kernel methods is that it is super flexible. However, it can also be very slow on large datasets (which happens at prediction time) and it can be difficult to interpret.
+      <br><br>
+      
+      <h2 id="3">Linear Classification</h2>
+      What about parametric regression? We can fit a linear regression model and use the line as a decision boundary, but this would be bad because the decision boundary will be thrown off by outliers.
+      <br><br>
+      
+      Assuming we are in a binary classification setting and are using the representation $\mathcal Y = \{-1, +1\}$, we can use the model $\hat y = \operatorname{sign}(f(x, w))$ where, today, our model class is linear: $$\hat y = \operatorname{sign}(w^\top x).$$
+      <br><br>
+      
+      If $x \in \mathbb R^2$, then the equation for the decision boundary is $$0 = w_0 + x_1 w_2 + x_2 w_2.$$
+      <br><br>
+
+      <h3>0/1 Loss</h3>
+      Now we have our model, we need to decide on a loss function. Here we run into a little bit of trouble, because one very natural loss function would be 0/1 loss: simply count the number of times we are wrong: $$\ell_{0/1}(z) = \begin{cases}1 & \text{if } z > 0 \\ 0 & \text{otherwise} \end{cases}.$$
+      <br><br>
+
+      This gives us an objective function $$\mathcal L_{\mathcal D}(w) = \sum_{\mathcal D} \ell_{0/1}(-y_n(w^\top x_n)).$$
+      <br><br>
+      
+      Here, $\ell_{0/1}$ gives us the loss for a single instance and $\mathcal L_{\mathcal D}$ gives us the total loss over the training dataset $\mathcal D$.
+      <br><br>
+      
+      The issue with this loss is that this doesn't consider uncertainty / distance from the boundary. This might be bad becuase you are penalizing the classifier for being wrong on a very ambiguous example the same amount as being wrong on a super obvious example. The classifier will be confused; it doesn't know which direction to move in order to improve.
+      <br><br>
+      
+      Mathematically, the derivative is always 0: it does not tell us which direction we can move in to lessen the loss. 
+      <br><br>
+      
+      <h3>Hinge Loss</h3>
+      Let's choose a loss that discerns between slightly and very wrong classificaitons: $$\ell_{\text{hinge}}(z) = \begin{cases}z & \text{if } z > 0 \\ 0 & \text{otherwise} \end{cases}.$$
+      <br><br>
+
+      This gives us an objective function $$\mathcal L_{\mathcal D}(w) = \sum_{\mathcal D} \ell_{\text{hinge}}(-y_n(w^\top x_n)).$$
+      <br><br>
+
+      If the signs do not match ($\operatorname{sign}(y_n) \neq \operatorname{sign}(w^\top x_n)$), then the classifier has put $x_n$ on the wrong side and is penalized by how far off $x_n$ was from the boundary. Remember that if $w^\top x_n = 0$, we are on the decision boundary, so $|w^\top x_n| = -y_n w^\top x_n$ is a measure of distance for incorrectly classified points. You can imagine this loss as being the sum of all incorrectly classified examples.
+      <br><br>
+
+      We can also take the derivative of the hinge loss!
+      <br><br>
+
+      $$\nabla_w\, \mathcal L_{\mathcal D}(w) = \nabla_w \left(-\sum_{\text{bad $y$s}} y_n w^\top x_n \right) = -\sum_{\text{bad $y$s}} y_n x_n.$$
+      <br><br>
+
+      Remember we can optimize $w$ by gradient descent:
+      $$w^{(t+1)} \leftarrow w^{(t)} - \eta \nabla_w\, \mathcal L(w^{(t)}).$$
+      <br><br>
+
+      However, this can be hard to do if our dataset is massive. Instead, we can use stochastic gradient descent (SGD). The idea is for each step where we compute the gradient, only compute the gradeint for a random smaller subset of our data.
+      <br><br>
+
+      $$w^{(t+1)} \leftarrow w^{(t)} - \eta \nabla_w\, \mathcal L_{\mathcal D^{(t)}}(w^{(t)})$$
+      where $\mathcal D^{(t)} \subset \mathcal D$ and $|\mathcal D^{(t)}| = M$.
+      <br><br>
+
+      We have to take more (noisy) steps in this case because our gradient is smaller, but because we calculate that gradient over less data this process is overall more efficient.
+      <br><br>
+      
+      Suppose we choose SGD where $M = 1$ and use the update rule that if $\hat y_n$ is incorrect, then $$w^{(t+1)} \leftarrow w^{(t)} - y_m x_m $$
+      <br><br>
+
+      This happens to be the 1958 Perceptron Algorithm, and it converges to a perfect solution (with respect to the hinge loss) if the data is perfectly seperable. At the time, people found this by just searching for update procedures and only now can we understand this as a form of gradient descent.
+
+
+      <h2 id="4">Metrics</h2>
+      There are four error metrics
+      <table class="note-table">
+        <tr><th>Metric</th><th>y</th><th>y-hat</th></tr>
+        <tr><td>True Positive</td><td>1</td><td>1</td></tr>
+        <tr><td>False Positive</td><td>0</td><td>1</td></tr>
+        <tr><td>True Negative</td><td>0</td><td>0</td></tr>
+        <tr><td>False Negative</td><td>1</td><td>0</td></tr>
+      </table>
+      <br>
+      These metrics can be combined to determine different kinds of rates such as
+      $$\begin{align*}
+      \text{precision} &= \frac{\text{TP}}{\text{TP} + \text{FP}} \\ \\
+      \text{accuracy} &= \frac{\text{TP} + \text{TN}}{\text{TP} + \text{TN} + \text{FP} + \text{FN}}\\ \\
+      \text{true positive rate} &= \frac{\text{TP}}{\text{TP} + \text{FN}} \\ \\
+      \text{false positive rate} &= \frac{\text{FP}}{\text{FP} + \text{TN}} \\ \\
+      \text{recall} &= \frac{\text{TP}}{\text{TP} + \text{FN}} \\ \\
+      \text{F1} &= \frac{2\cdot \text{precision}\cdot\text{recall}}{\text{precision}+\text{recall}}
+      \end{align*}
+      $$
+
+    </div>
+</section>

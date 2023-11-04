@@ -1,0 +1,491 @@
+tas:
+  - name: <a href="mailto:alexanderchin@college.harvard.edu">Alex Chin</a> (Head TF)
+  - name: <a href="mailto:ktian@college.harvard.edu">Katherine Tian</a> (Head TF)
+  - name: <a href="mailto:annatrella@g.harvard.edu">Anna Trella</a>
+  - name: <a href="mailto:anuragmitra@college.harvard.edu">Anurag Mitra</a>
+  - name: <a href="mailto:catherinezeng@college.harvard.edu">Catherine Zeng</a>
+  - name: <a href="mailto:charumathibadrinath@college.harvard.edu">Charumathi Badrinath</a>
+  - name: <a href="mailto:lliu@college.harvard.edu">Lucy Liu</a>
+  - name: <a href="mailto:matthewnazari@college.harvard.edu">Matthew Nazari</a>
+  - name: <a href="mailto:mshabet@college.harvard.edu">Matthew Shabet</a>
+  - name: <a href="mailto:mguo@college.harvard.edu">Max Guo</a>
+  - name: <a href="mailto:ocheng@college.harvard.edu">Oliver Weng</a>
+  - name: <a href="mailto:raphaelpellegrin@g.harvard.edu">Raphael Pellegrin</a>
+  - name: <a href="mailto:seanty@college.harvard.edu">Sean Ty</a>
+  - name: <a href="mailto:skylerwu@college.harvard.edu">Skyler Wu</a>
+
+
+ohs:
+  - time: TBD
+    TF: TBD
+
+
+dates: [
+  "",
+  "Week 0",
+  "Jan. 25 (Tu)",
+  "Jan. 27 (Th)",
+  "Jan. 28 (Fr)",
+  "Week 1",
+  "Feb. 1 (Tu)",
+  "Feb. 3 (Th)",
+  "Feb. 4 (Fr)",
+  "Week 2",
+  "Feb. 8 (Tu)",
+  "Feb. 10 (Th)",
+  "Feb. 11 (Fr)",
+  "Week 3",
+  "Feb. 15 (Tu)",
+  "Feb. 17 (Th)",
+  "Feb. 18 (Fr)",
+  "Week 3",
+  "Feb. 22 (Tu)",
+  "Feb. 24 (Th)",
+  "Feb. 25 (Fr)",
+  "Week 4",
+  "Mar. 1 (Tu)",
+  "Mar. 3 (Th)",
+  "Mar. 4 (Fr)",
+  "Week 5",
+  "Mar. 8 (Tu)",
+  "Mar. 10 (Th)",
+  "Mar. 11 (Fr)",
+  "Week 6",
+  "Mar. 15 (Tu)",
+  "Mar. 17 (Th)",
+  "Mar. 18 (Fr)",
+  "Week 7",
+  "Mar. 22 (Tu)",
+  "Mar. 24 (Th)",
+  "Mar. 25 (Fr)",
+  "Week 8",
+  "Mar. 29 (Tu)",
+  "Mar. 31 (Th)",
+  "Apr. 1 (Fr)",
+  "Week 9",
+  "Apr. 5 (Tu)",
+  "Apr. 7 (Th)",
+  "Apr. 8 (Fr)",
+  "Week 10",
+  "Apr. 12 (Tu)",
+  "Apr. 14 (Th)",
+  "Apr. 15 (Fr)",
+  "Week 11",
+  "Apr. 19 (Tu)",
+  "Apr. 21 (Th)",
+  "Apr. 22 (Fr)",
+  "Week 12",
+  "Apr. 26 (Tu)",
+  "Apr. 28 (Th)",
+  "Apr. 29 (Fr)",
+]
+
+lectures:
+  # Week 0
+  - topic:
+    subtopic:
+    section: <a href="/cs181-web/sections#sec0">0. Math and Code Review</a>
+    readings:
+    hw:
+    type: 'sec'
+  # Tu
+  - topic:
+    subtopic: <a href="/cs181-web/recaps/lec1">Welcome to CS181</a>
+    section:
+    readings: Ch 1
+    release: <a href="/cs181-web/homework#hw1">HW 1 released (regression)</a>
+  # Th
+  - topic: Regression
+    subtopic: <a href="/cs181-web/recaps/lec2">Linear Regression</a>
+    section:
+    readings: 2.3-2.5, 2.6.1, 2.7.1
+    hw:
+  # Fr
+  - topic:
+    subtopic:
+    section:
+    readings:
+    hw:
+    type: 'hw'
+
+  # Week 1
+  - topic:
+    subtopic:
+    section: <a href="/cs181-web/sections#sec1">1. Linear regression</a>
+    readings:
+    hw:
+    type: 'sec'
+  # Tu
+  - topic: Regression
+    subtopic: <a href="/cs181-web/recaps/lec3">Probabilistic Linear Regression</a>
+    section:
+    readings: 2.6.2, 2.6.3
+    hw:
+  # Th
+  - topic: Classification
+    subtopic: <a href="/cs181-web/recaps/lec4">Linear Classification</a>
+    section:
+    readings: 3.1-3.5
+  # Fr
+  - topic:
+    subtopic:
+    section:
+    readings:
+    release:
+    type: 'hw'
+
+  # Week 2
+  - topic:
+    subtopic:
+    section: <a href="/cs181-web/sections#sec2">2. Linear and probabilistic classification</a>
+    readings:
+    hw:
+    type: 'sec'
+  # Tu
+  - topic: Classification
+    subtopic: <a href="/cs181-web/recaps/lec5">Probabilistic Linear Classification</a>
+    section:
+    readings: 3.6
+    demos:
+    hw:
+  # Th
+  - topic: Model selection
+    subtopic: <a href="/cs181-web/recaps/lec6">Model Selection, Frequentist</a>
+    section:
+    readings: 2.7, 2.8
+    hw:
+  # Fr
+  - topic:
+    subtopic:
+    section:
+    readings:
+    dl: HW 1 due
+    release: <a href="/cs181-web/homework#hw2">HW 2 released (classification and model selection)</a>
+    hw:
+    type: 'hw'
+
+  # Week 3
+  - topic:
+    subtopic:
+    section: <a href="/cs181-web/sections#sec3">3. Model selection</a>
+    readings:
+    hw:
+    type: 'sec'
+  # Tu
+  - topic: Model selection
+    subtopic: <a href="/cs181-web/recaps/lec7">Model Selection, Bayesian</a>
+    section:
+    readings: 2.8, 2.9
+    hw:
+  # Th
+  - topic: Neural networks
+    subtopic: <a href="/cs181-web/recaps/lec8">Neural Networks 1</a>
+    section:
+    readings: 4.1-4.4, 4.6
+    hw:
+  # Fr
+  - topic:
+    subtopic:
+    section:
+    readings:
+    type: 'hw'
+
+  # Week 4
+  - topic:
+    subtopic:
+    section: <a href="/cs181-web/sections#sec4">4. Neural networks</a>
+    readings:
+    hw:
+    type: 'sec'
+  # Tu
+  - topic: Neural networks
+    subtopic: <a href="/cs181-web/recaps/lec9">Neural Networks 2</a>
+    section:
+    readings: 4.4
+    hw:
+  # Th
+  - topic: SVMs
+    subtopic: <a href="/cs181-web/recaps/lec10">Support Vector Machines 1</a>
+    section:
+    readings: 5.1-5.3
+    hw:
+  # Fr
+  - topic:
+    subtopic:
+    section:
+    readings:
+    dl: HW 2 due
+    release: <a href="/cs181-web/homework#hw3">HW 3 released (neural networks, model selection)</a>
+    type: 'hw'
+
+  # Week 5
+  - topic:
+    subtopic:
+    section: Midterm 1 review
+    readings:
+    hw:
+    type: 'sec'
+  # Tu
+  - topic:
+    subtopic: Midterm 1
+    section:
+    readings:
+    type: 'exam'
+    hw:
+  # Th
+  - topic:
+    subtopic: <a href="/cs181-web/recaps/lec14">Ethics</a>
+    section:
+    readings:
+    type:
+    hw:
+  # Fr
+  - topic:
+    subtopic:
+    section:
+    readings:
+    type: 'hw'
+
+  # Week 6
+  - topic:
+    subtopic:
+    section: <a href="/cs181-web/sections#sec5">5. SVMs</a>
+    readings:
+    hw:
+    type: 'sec'
+  # Tu
+  - topic: SVMs 2
+    subtopic: <a href="/cs181-web/recaps/lec11">Support Vector Machines 2</a>
+    section:
+    readings: 5.4
+    hw:
+  # Th
+  - topic: Unsupervised learning
+    subtopic: <a href="/cs181-web/recaps/lec13">Clustering</a>
+    section:
+    readings: 6
+    demos:
+    hw:
+  # Fr
+  - topic:
+    subtopic:
+    section:
+    readings:
+    hw:
+    dl: HW 3 due
+    release: <a href="/cs181-web/homework#hw4">HW 4 released (ethics, clustering, SVM)</a>
+    type: 'hw'
+
+  # Week 7
+  - topic:
+    subtopic:
+    section: <a href="/cs181-web/sections#sec7">7. K-means, HAC</a>
+    readings:
+    hw:
+    type: 'sec'
+  # Tu
+  - topic:
+    subtopic: Spring break
+    section:
+    readings:
+    demos:
+    hw: <a href="/cs181-web/homework#hw4">HW4 (SVM, Clustering, and Ethics)</a> released
+  # Th
+  - topic:
+    subtopic: Spring break
+    section:
+    readings: 9.1-9.5
+    demos:
+    hw:
+  # Fr
+  - topic:
+    subtopic: Spring break
+    subtopic:
+    section:
+    readings:
+    type: 'hw'
+
+  # Week 8
+  - topic:
+    subtopic:
+    section: <a href="/cs181-web/sections#sec8">8. Mixture, EM</a>
+    readings:
+    hw:
+    type: 'sec'
+  # Tu
+  - topic:
+    subtopic: <a href="/cs181-web/recaps/lec15">Mixture Models</a>
+    section:
+    readings:
+    hw:
+  # Th
+  - topic:
+    subtopic: <a href="/cs181-web/recaps/lec16">PCA</a>
+    section:
+    readings:
+    hw:
+  # Fr
+  - topic:
+    subtopic:
+    section:
+    readings:
+    dl: HW 4 due
+    release: <a href="/cs181-web/homework#hw5">HW 5 released (Mixtures, EM, graphical models)</a>
+    type: 'hw'
+
+  # Week 9
+  - topic:
+    subtopic:
+    section: <a href="/cs181-web/sections#sec9">9. PCA, topic models</a>
+    readings:
+    hw:
+    type: 'sec'
+  # Tu
+  - topic:  GMs and BNs
+    subtopic: <a href="/cs181-web/recaps/lec17">Topic Models</a>
+    section:
+    readings: 8
+    hw:
+    type:
+  # Th
+  - topic:
+    subtopic: <a href="/cs181-web/recaps/lec18">Graphical Models</a>
+    section:
+    readings:
+    demos:
+    hw:
+  # Fr
+  - topic:
+    subtopic:
+    section:
+    readings:
+    release: Practical released
+    type: 'hw'
+
+  # Week 10
+  - topic:
+    subtopic:
+    section: <a href="/cs181-web/sections#sec10">10. Bayes nets, inference</a>
+    readings:
+    hw:
+    type: 'sec'
+  # Tu
+  - topic:
+    subtopic: <a href="/cs181-web/recaps/lec19">Inference for Bayes Nets</a>
+    section:
+    readings:
+    hw:
+    type:
+  # Th
+  - topic:
+    subtopic: <a href="/cs181-web/recaps/lec20">Hidden Markov Models</a>
+    section:
+    readings:
+    demos:
+    hw:
+  # Fr
+  - topic:
+    subtopic:
+    section:
+    readings:
+    dl: HW 5 due
+    release:
+    type: 'hw'
+
+  # Week 11
+  - topic:
+    subtopic:
+    section: <a href="/cs181-web/sections#sec11">11. HMMs, Kalman filters</a>
+    readings:
+    hw:
+    type: 'sec'
+  # Tu
+  - topic: RL
+    subtopic: <a href="/cs181-web/recaps/lec21">Markov Decision Processes</a>
+    section:
+    readings: SB 3.1-3.6, SB 4.1-4.4 *
+    hw:
+  # Th
+  - topic:
+    subtopic:
+    section:
+    readings:
+    hw:
+  # Fr
+  - topic:
+    subtopic:
+    section:
+    readings:
+    dl: Practical due
+    release: <a href="/cs181-web/homework#hw6">HW6 released (inference in graphical models, MDPs)</a>
+    type: 'hw'
+
+  # Week 12
+  - topic:
+    subtopic:
+    section: <a href="/cs181-web/sections#sec12">12. Reinforced learning, MDPs</a>
+    readings:
+    hw:
+    type: 'sec'
+  # Tu
+  - topic:
+    subtopic: <a href="/cs181-web/recaps/lec22">Reinforcement Learning 2</a>
+    section:
+    readings: SB 1.1-1.4, SB 6.1-6.5 *
+    hw:
+  # Th
+  - topic:
+    subtopic: <a href="/cs181-web/recaps/lec23">Interpretability</a>
+    section:
+    readings:
+    demos:
+    hw:
+    type:
+  # Fr
+  - topic:
+    subtopic:
+    section:
+    readings:
+    dl:
+    type: 'hw'
+
+  # Week 13
+  - topic:
+    subtopic:
+    section: Midterm 2 review
+    readings:
+    hw:
+    type: 'sec'
+  # Tu
+  - topic:
+    subtopic: Midterm 2
+    section:
+    readings:
+    hw:
+    type: 'exam'  # Tu
+  - topic:
+    subtopic:
+    section:
+    readings:
+    hw:
+  # Fr
+  - topic:
+    subtopic:
+    section:
+    readings:
+    dl: HW 6 due
+    type: 'hw'
+
+beyondcs181:
+  - name: "(02/11/2022) Kernel Regression and Gaussian Processes (<a href='/cs181-web/files/beyond_cs_181_L1.pdf'>Slides</a>)"
+  - name: "(02/18/2022) Decision Trees and Ensemble Models (<a href='/cs181-web/files/beyond_cs_181_L2.pdf'>Slides</a>)"
+  - name: (02/25/2022) SKIP due to Midterm
+  - name: "(03/04/2022) Neural Network Architectures I (<a href='/cs181-web/files/beyond_cs_181_L3.pdf'>Slides</a>)"
+  - name: "(03/11/2022) Neural Network Architectures II"
+  - name: "(03/18/2022) SKIP due to Spring Recess"
+  - name: "(03/25/2022) Training Neural Networks"
+  - name: "(04/01/2022) How To Read ML Research Papers (<a href='/cs181-web/files/beyond_cs_181_L8.pdf'>Slides</a>)"
+  - name: "(04/08/2022) How To Run ML Experiments (<a href='/cs181-web/files/beyond_cs_181_L9.pdf'>Slides</a>)"
+  - name: "(04/15/2022) Deep Generative Models (GANs) (<a href='/cs181-web/files/beyond_cs_181_L10.pdf'>Slides</a>)"
+  - name: "(04/22/2022) Interpretability and Explainability in ML"
+  - name: "(04/29/2022) Reinforcement Learning for Real Life (RL4RL)"

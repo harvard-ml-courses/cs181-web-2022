@@ -1,0 +1,103 @@
+---
+layout: page
+title: Lecture 7 Recap - Model Selection (Bayesian)
+mathjax: true
+weight: 0
+---
+
+<section class="main-container text">
+    <div class="main">
+      <h4>Date: February 15, 2022</h4>
+      <h4>Relevant Textbook Sections: 2.8, 2.9</h4>
+
+      <br>
+
+      <h4><a href="https://canvas.harvard.edu/courses/100256/external_tools/38806">Lecture Video</a></h4>
+
+      <h2>Announcements</h2>
+      <ol>
+        <li>Ask quiet questions during lecture <a href="https://docs.google.com/document/d/1i3IsqZnc9c1sfgxlKSTbNfSt77Ck5QYJDwECzSBis90/edit">here</a></li>
+        <li>Get started early on HW2, even though it is next (not this) Friday</li>
+      </ol>
+
+      <h2>Lecture 7 Summary</h2>
+
+      <ul>
+        <li><a href="#1">Bayesian Models</a></li>
+        <li><a href="#2">Posterior over Parameters</a></li>
+        <li><a href="#3">Posterior Predictive</a></li>
+        <li><a href="#4">Prior Selection</a></li>
+      </ul>
+
+      <h2 id="1">Bayesian Models</h2>
+
+      What is Bayesian approach? Before, we assumed that ever $y$ was determined by some $x$ and some global, fixed, unknown parameters $w$. For example, in linear regression a prediction $y$ comes from a corresponding $x$ and some fixed value of $w$ which we had to search for. Imagine, now, that our global parameters are no longer fixed. Namely, imagine our parameters $w$ are random variables. If this is true, then we no longer can solve for a single value. This gives us a framework for
+      <ol>
+        <li>Computing the posterior $p(w | \mathcal D)$</li>
+        <li>Computing the posterior predictive $p(y^* | x^*, \mathcal D)$</li>
+        <li>Computing the probability of the data $p(\mathcal D) := p(\{y_i\} | \{x_i\})$</li>
+      </ol>
+
+      Because our global parameters are random variables, we will always be marginalizing them out. This correpsonds to just taking an average over the values they might be.
+
+      <h2 id="2">Posterior over Parameters</h2>
+
+      This is relatively simple: we just apply Bayes' rule:
+      $$
+      \begin{align}
+        p(w | \mathcal D) &= \frac{p(\{y_i\} | \{x_i\}, w) p(w | \{x_i\})}{p(\{y_i\} | \{x_i\})} \\
+        &= \frac{p(\{y_i\} | \{x_i\}, w) p(w)}{p(\{y_i\} | \{x_i\})} \\
+      \end{align}
+      $$
+
+      Note that this derivation depends on the assumption that $p(\mathcal D) = p(\{y_i\} | \{x_i\})$ and $p(w | \{x_i\}) = p(w)$. We choose the prior distribution $p(w)$ to reflect our prior believes on what the model should look like. For example, we may pick coefficients in linear regression that are rather small, so we would pick a distribution $p(w)$ concentrated around 0.
+      <br>
+
+      Take, for example, flipping $N$ coins $\mathcal D = x_1, \ldots, x_N$ where $x_i \in \{0, 1\}$. The likelihood of the dataset (that likelihood of seeing the heads and tails we saw) is $p(\mathcal D | \theta) = \theta^{N_H} (1-\theta)^{N_T}$ where $\theta$ is a correpsonding to the unknown fairness of the coin, $N_H$ is the number of heads, and $N_T$ is the number of coins. With a frequentist approach where we assume $\theta$ is unknown but fixed, we would choose the single value $\theta_\text{MLE} = \frac{N_H}{N_H + N_T}$ that maximizes this likelihood.
+      <br>
+      
+      From a Bayesian perspective, $\theta$ is a random variable and we must estimate its posterior given the coin flips we have seen. For this to work, we need to decide on what our prior beliefs are by deciding on a prior distribution on $\theta$. If we assume it is distributed as $\operatorname{Beta}(\alpha, \beta)$. Then, $p(\theta) = \theta^{\alpha - 1} (1-\theta)^{\beta-1})$ is our prior distribution. Now we can calculate the posterior
+      $$
+      \begin{align}
+        p(\theta | \mathcal D) &= p(\mathcal D | \theta)p(\theta) \\
+        &= \theta^{N_H} (1-\theta)^{N_T}  \theta^{\alpha - 1} (1-\theta)^{\beta-1}) \\
+        &= \theta^{N_H + \alpha - 1} (1-\theta)^{N_T + \beta - 1}) \\
+        &= \theta^{\alpha' - 1} (1-\theta)^{\beta' - 1}).
+      \end{align}
+      $$
+      Hence, the posterior distribution is another Beta distribution $\operatorname{Beta}(\alpha', \beta')$ where $\alpha'=\alpha + N_H$ and $\beta'=\beta + N_T$.
+
+      <h2 id="3">Predictive Posterior</h2>
+
+      How do we use the posterior distribution over weights to make predictions? We saw how we can choose the parameters which maximize our data likelihood $p(\mathcal D | \theta)$: $$\theta_\text{MLE} \in \operatorname*{argmax}_\theta p(\mathcal D | \theta) = \frac{N_H}{N_H + N_T}.$$
+      <br>
+      
+      However, we can also use posterior $p(\theta | \mathcal D)$ by taking the single most likely value of $\theta$ to make our decision: $$\theta_\text{MAP} \in \operatorname*{argmax}_\theta p(\theta | \mathcal D) = \frac{N_H + \alpha - 1}{N_H + N_T + \beta + \alpha - 2}.$$
+      <br>
+
+      However, any true Bayesian will use $p(\theta | \mathcal D)$ to average over all possible models $\theta$:
+      $$
+      \begin{align}
+        p(x^* = 1 | x_1, \ldots, x_N) &= \int_\theta p(x^* = 1 | \theta) p(\theta | \mathcal D) \, d\theta \\
+        &= \int \theta p(\theta | x) \, d\theta \\
+        &= \mathbb E_{p(\theta | \mathcal D)} [\theta] \\
+        &= \frac{\alpha + N_H}{N_H + N_T + \alpha + \beta}
+      \end{align}
+      $$
+
+      In this very simple example, $p(x | \theta)$ simplified out very cleanly as just $p(x^* = 1 | \theta) = \theta$. Usually this is not the case. Also note that this isn't an estimate for a single $\theta$ value. We averaged out the $\theta$!
+      <br>
+
+      Also note that was $|\mathcal D|$ grows, these prediction techniques approach the same predictions.
+
+      <h2 id="4">Prior Selection</h2>
+      In a Bayesian setting, model selection corresponds to model class selection and prior selection. For example, when fitting data we can select what type of curve to fit (line, parabola) and also what prior to put on the parameters of the curve. There is no point in searching for one single correct line or parabola since we will average over all possible ones equally.
+      <br>
+
+      How do we select between two models then? What we can do is calculate the likelihood of the data $p(\mathcal D)$ for different model classes: $$p(\mathcal D) = \int_w p(\mathcal D | w) p(w) \, d\,w.$$
+      <br>
+
+      If we are considering too many possible models $w$, then $p(w)$ is spread out and the integral in $p(\mathcal D)$ will turn out to be very low. This is how the Bayesian approach penalizes overly complicated models. However, if $p(w)$ doesn't contain very good models, then the $p(\mathcal D | w)$ factor will be low and the integral will still turn out to be very low! Hence, the ideal prior is a Goldilocks problem.   
+
+    </div> 
+</section>
